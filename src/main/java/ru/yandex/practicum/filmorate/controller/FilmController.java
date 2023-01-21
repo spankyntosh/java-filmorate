@@ -49,7 +49,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilmInfo(@Valid @RequestBody Film film) {
         log.info("Пришёл запрос на изменение информации по фильму");
-        if (!filmsCollection.keySet().contains(film.getId())) {
+        if (film.getId() == null ||  !filmsCollection.keySet().contains(film.getId())) {
             throw new UpdateFilmOrUserWithIncorrectIdException("Попытка обновить информацию по фильму с несуществующим id фильма");
         }
         filmsCollection.put(film.getId(), film);

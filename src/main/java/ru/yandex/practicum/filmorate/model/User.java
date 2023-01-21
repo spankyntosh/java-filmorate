@@ -11,14 +11,13 @@ import java.time.LocalDate;
 public class User {
 
     int id;
-    @Email
+    @Email(message = "Неверно указан формат электронной почты")
     String email;
-    @NotBlank
-    @NoWhitespaceValidation
+    @NotBlank(message = "логин пользователя не должен быть пустым")
+    @NoWhitespaceValidation(message = "в логине не должно содержаться пробелов")
     String login;
     String name;
-    @Past
+    @Past(message = "Дата дня рождения не может быть в будущем или сегодняшним днём")
     LocalDate birthday;
-
 
 }

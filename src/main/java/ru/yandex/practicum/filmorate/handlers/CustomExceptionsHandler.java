@@ -47,7 +47,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UpdateFilmOrUserWithIncorrectIdException.class)
     public ResponseEntity<OnExceptionResponse> handleIncorrectId(UpdateFilmOrUserWithIncorrectIdException exception) {
         OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 }
