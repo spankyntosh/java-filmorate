@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.handlers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
     @Override
@@ -34,19 +36,21 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
                 .collect(Collectors.toList());
 
         body.put("errors", errors);
-
+        log.warn(errors.toString());
         return new ResponseEntity<>(body, headers, status);
     }
 
     @ExceptionHandler(UserOrFilmAlreadyExistException.class)
     public ResponseEntity<OnExceptionResponse> handleAlreadyExistEntities(UserOrFilmAlreadyExistException exception) {
         OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+        log.warn(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UpdateFilmOrUserWithIncorrectIdException.class)
     public ResponseEntity<OnExceptionResponse> handleIncorrectId(UpdateFilmOrUserWithIncorrectIdException exception) {
         OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+        log.warn(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
