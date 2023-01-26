@@ -9,4 +9,5 @@ public interface UserStorage {
     Collection<User> getUsers();
     User addUser(User user);
     User updateUserInfo(User user);
+    boolean isUserExists(User user);
 }

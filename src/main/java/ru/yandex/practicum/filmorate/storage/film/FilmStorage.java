@@ -8,5 +8,6 @@ public interface FilmStorage {
     Collection<Film> getFilms();
     Film addFilm(Film film);
     Film updateFilmInfo(Film film);
+    boolean ifFilmExists(Film film);
 
 }
