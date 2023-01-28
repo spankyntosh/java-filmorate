@@ -25,6 +25,16 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/{id}/friends")
+    public Collection<User> getUserFriends(@PathVariable Integer id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
         log.info("Пришёл запрос на добавление нового пользователя");
@@ -36,5 +46,18 @@ public class UserController {
         log.info("Пришёл запрос на изменение информации по пользователю");
         return userService.updateUserInfo(user);
     }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable String id, @PathVariable String friendId) {
+        log.info("Пришёл запрос на добавление в друзья");
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void excludeFromFriends(@PathVariable String id, @PathVariable String friendId) {
+        log.info("Пришёл запрос на исключение из друзей");
+        userService.excludeFromFriends(id, friendId);
+    }
+
 
 }

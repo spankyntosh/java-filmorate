@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -36,7 +38,42 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean isUserExists(User user) {
-        return users.containsKey(user.getId());
+    public boolean isUserExists(Integer userId) {
+        return users.containsKey(userId);
     }
+
+    @Override
+    public void addFriend(String userId, String friendId) {
+        users.get(Integer.valueOf(userId)).getFriends().add(Integer.valueOf(friendId));
+    }
+
+    @Override
+    public void excludeFromFriends(String userId, String friendId) {
+        users.get(Integer.valueOf(userId)).getFriends().remove(Integer.valueOf(friendId));
+    }
+
+    @Override
+    public Collection<User> getUserFriends(Integer userId) {
+        return users.get(userId).getFriends()
+                .stream()
+                .map(friendId -> users.get(friendId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Integer userId, Integer otherUserId) {
+        Set<Integer> userFriends = users.get(userId).getFriends();
+        Set<Integer> otherUserFriends = users.get(otherUserId).getFriends();
+        return userFriends.stream()
+                .flatMap(userFriend -> otherUserFriends.stream().filter(userFriend::equals))
+                .sorted(Integer::compareTo)
+                .map(id -> users.get(id)).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public boolean isUserAlreadyInFriends(String userId, String friendId) {
+        return users.get(userId).getFriends().contains(Integer.valueOf(friendId));
+    }
+
 }

@@ -9,5 +9,10 @@ public interface UserStorage {
     Collection<User> getUsers();
     User addUser(User user);
     User updateUserInfo(User user);
-    boolean isUserExists(User user);
+    boolean isUserExists(Integer userId);
+    void addFriend(String userId, String friendId);
+    void excludeFromFriends(String userId, String friendId);
+    Collection<User> getUserFriends(Integer userId);
+    Collection<User> getCommonFriends(Integer userId, Integer otherId);
+    boolean isUserAlreadyInFriends(String userId, String friendId);
 }
