@@ -29,6 +29,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return filmsCollection.values().stream()
                 .sorted((o1, o2) -> {
                     int comparison = Integer.compare(o1.getLikes().size(), o2.getLikes().size());
+                    //меняем естественный порядок сортировки, чтобы сначала были фильмы с наибольшим количеством лайков
+                    comparison = -1 * comparison;
                     return comparison;
                 })
                 .limit(count)

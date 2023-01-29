@@ -56,7 +56,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserReLikeException.class)
-    public ResponseEntity<OnExceptionResponse> handleReLikeException(FilmOrUserNotFoundException exception) {
+    public ResponseEntity<OnExceptionResponse> handleReLikeException(UserReLikeException exception) {
         OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
         log.warn(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
