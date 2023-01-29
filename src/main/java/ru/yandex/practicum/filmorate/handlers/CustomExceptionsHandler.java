@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.yandex.practicum.filmorate.exceptions.OnExceptionResponse;
-import ru.yandex.practicum.filmorate.exceptions.UpdateFilmOrUserWithIncorrectIdException;
+import ru.yandex.practicum.filmorate.exceptions.FilmOrUserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.exceptions.UserReLikeException;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -47,11 +48,17 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UpdateFilmOrUserWithIncorrectIdException.class)
-    public ResponseEntity<OnExceptionResponse> handleIncorrectId(UpdateFilmOrUserWithIncorrectIdException exception) {
+    @ExceptionHandler(FilmOrUserNotFoundException.class)
+    public ResponseEntity<OnExceptionResponse> handleIncorrectId(FilmOrUserNotFoundException exception) {
         OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
         log.warn(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserReLikeException.class)
+    public ResponseEntity<OnExceptionResponse> handleReLikeException(FilmOrUserNotFoundException exception) {
+        OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+        log.warn(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

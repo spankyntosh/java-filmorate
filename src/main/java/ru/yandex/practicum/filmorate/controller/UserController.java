@@ -25,6 +25,11 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
     @GetMapping("/{id}/friends")
     public Collection<User> getUserFriends(@PathVariable Integer id) {
         return userService.getUserFriends(id);

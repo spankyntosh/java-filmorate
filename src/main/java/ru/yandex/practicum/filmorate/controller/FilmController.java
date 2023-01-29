@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
+import javax.websocket.server.PathParam;
 import java.util.Collection;
 
 
@@ -28,6 +29,16 @@ public class FilmController {
         return filmService.getFilms();
     }
 
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Integer id) {
+        return filmService.getFilmById(id);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
+        return filmService.getPopularFilms(count);
+    }
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Пришёл запрос на добавление нового фильма");
@@ -38,6 +49,16 @@ public class FilmController {
     public Film updateFilmInfo(@Valid @RequestBody Film film) {
         log.info("Пришёл запрос на изменение информации по фильму");
         return filmService.updateFilmInfo(film);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.removeLike(id, userId);
     }
 
 }

@@ -3,10 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,12 +24,16 @@ public class InMemoryUserStorage implements UserStorage {
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
+        user.setFriends(new HashSet<>());
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public User updateUserInfo(User user) {
+        if (user.getFriends() == null) {
+            user.setFriends(users.get(user.getId()).getFriends());
+        }
         users.put(user.getId(), user);
         return user;
     }
@@ -45,11 +46,17 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addFriend(String userId, String friendId) {
         users.get(Integer.valueOf(userId)).getFriends().add(Integer.valueOf(friendId));
+        users.get(Integer.valueOf(friendId)).getFriends().add(Integer.valueOf(userId));
     }
 
     @Override
     public void excludeFromFriends(String userId, String friendId) {
         users.get(Integer.valueOf(userId)).getFriends().remove(Integer.valueOf(friendId));
+    }
+
+    @Override
+    public User getUserById(Integer userId) {
+        return users.get(userId);
     }
 
     @Override
@@ -73,7 +80,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public boolean isUserAlreadyInFriends(String userId, String friendId) {
-        return users.get(userId).getFriends().contains(Integer.valueOf(friendId));
+        return users.get(Integer.valueOf(userId)).getFriends().contains(Integer.valueOf(friendId));
     }
 
 }
