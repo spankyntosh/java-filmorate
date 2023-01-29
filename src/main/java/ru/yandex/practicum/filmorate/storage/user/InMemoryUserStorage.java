@@ -44,14 +44,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(String userId, String friendId) {
-        users.get(Integer.valueOf(userId)).getFriends().add(Integer.valueOf(friendId));
-        users.get(Integer.valueOf(friendId)).getFriends().add(Integer.valueOf(userId));
+    public void addFriend(Integer userId, Integer friendId) {
+        users.get(userId).getFriends().add(friendId);
+        users.get(friendId).getFriends().add(userId);
     }
 
     @Override
-    public void excludeFromFriends(String userId, String friendId) {
-        users.get(Integer.valueOf(userId)).getFriends().remove(Integer.valueOf(friendId));
+    public void excludeFromFriends(Integer userId, Integer friendId) {
+        users.get(userId).getFriends().remove(friendId);
     }
 
     @Override
@@ -79,8 +79,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean isUserAlreadyInFriends(String userId, String friendId) {
-        return users.get(Integer.valueOf(userId)).getFriends().contains(Integer.valueOf(friendId));
+    public boolean isUserAlreadyInFriends(Integer userId, Integer friendId) {
+        return users.get(userId).getFriends().contains(friendId);
     }
 
 }

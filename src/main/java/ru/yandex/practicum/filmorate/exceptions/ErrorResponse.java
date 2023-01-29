@@ -1,19 +1,18 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class OnExceptionResponse {
+public class ErrorResponse {
 
     private String message;
 
-    public OnExceptionResponse() {
+    public ErrorResponse() {
     }
 
-    public OnExceptionResponse(String message) {
+    public ErrorResponse(String message) {
         this.message = message;
     }
 }

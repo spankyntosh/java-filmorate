@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.TryingToReFriendException;
-import ru.yandex.practicum.filmorate.exceptions.FilmOrUserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ReFriendException;
+import ru.yandex.practicum.filmorate.exceptions.UserOrFilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -26,24 +26,24 @@ public class UserService {
 
     public User getUserById(Integer userId) {
         if (!userStorage.isUserExists(userId)) {
-            throw new FilmOrUserNotFoundException("Попытка получить пользователя с несуществующим id");
+            throw new UserOrFilmNotFoundException(String.format("Пользователь с id %d не найден", userId));
         }
         return userStorage.getUserById(userId);
     }
 
     public Collection<User> getUserFriends(Integer userId) {
         if (!userStorage.isUserExists(userId)) {
-            throw new FilmOrUserNotFoundException("Попытка получить список друзей у пользователя с несуществующим id");
+            throw new UserOrFilmNotFoundException(String.format("Пользователь с id %d не найден", userId));
         }
         return userStorage.getUserFriends(userId);
     }
 
     public Collection<User> getCommonFriends(Integer userId, Integer otherUserId) {
         if (!userStorage.isUserExists(userId)) {
-            throw new FilmOrUserNotFoundException("Попытка получить список общих друзей у пользователя с несуществующим id");
+            throw new UserOrFilmNotFoundException(String.format("Пользователь с id %d не найден", userId));
         }
         if (!userStorage.isUserExists(otherUserId)) {
-            throw new FilmOrUserNotFoundException("Попытка получить список общих друзей с пользователем с несуществующим id");
+            throw new UserOrFilmNotFoundException("Попытка получить список общих друзей с пользователем с несуществующим id");
         }
         return userStorage.getCommonFriends(userId, otherUserId);
     }
@@ -51,7 +51,7 @@ public class UserService {
     public User addUser(User user) {
         for (User existingUser : userStorage.getUsers()) {
             if (existingUser.getEmail().equals(user.getEmail())) {
-                throw new UserOrFilmAlreadyExistException("Пользователь с такой почтой уже существует");
+                throw new UserOrFilmAlreadyExistException(String.format("Пользователь с почтой %s уже существует", user.getEmail()));
             }
         }
 
@@ -60,33 +60,33 @@ public class UserService {
 
     public User updateUserInfo(User user) {
         if (!userStorage.isUserExists(user.getId())) {
-            throw new FilmOrUserNotFoundException("Попытка обновить информацию по пользователю с несуществующим id");
+            throw new UserOrFilmNotFoundException(String.format("Пользователь с id %d не найден", user.getId()));
         }
         return userStorage.updateUserInfo(user);
     }
 
-    public void addFriend(String userId, String friendId) {
-        if (!userStorage.isUserExists(Integer.valueOf(userId))) {
-            throw new FilmOrUserNotFoundException("Попытка добавить в друзья пользователя с несуществующим id");
+    public void addFriend(Integer userId, Integer friendId) {
+        if (!userStorage.isUserExists(userId)) {
+            throw new UserOrFilmNotFoundException("Попытка добавиться в друзья к пользователю с несуществующим id");
         }
-        if (!userStorage.isUserExists(Integer.valueOf(friendId))) {
-            throw new FilmOrUserNotFoundException("Попытка добавиться в друзья с несуществующим id пользователя");
+        if (!userStorage.isUserExists(friendId)) {
+            throw new UserOrFilmNotFoundException("Попытка добавиться в друзья с несуществующим id");
         }
         if (userStorage.isUserAlreadyInFriends(userId, friendId)) {
-            throw new TryingToReFriendException("Попытка добавить в друзья пользователя уже находящегося в списке друзей");
+            throw new ReFriendException("Попытка добавить в друзья пользователя уже находящегося в списке друзей");
         }
         userStorage.addFriend(userId, friendId);
     }
 
-    public void excludeFromFriends(String userId, String friendId) {
-        if (!userStorage.isUserExists(Integer.valueOf(userId))) {
-            throw new FilmOrUserNotFoundException("Попытка исключить из друзей пользователя с несуществующим id");
+    public void excludeFromFriends(Integer userId, Integer friendId) {
+        if (!userStorage.isUserExists(userId)) {
+            throw new UserOrFilmNotFoundException("Попытка исключить из друзей у пользователя с несуществующим id");
         }
-        if (!userStorage.isUserExists(Integer.valueOf(friendId))) {
-            throw new FilmOrUserNotFoundException("Попытка исключить друга у пользователя с несуществующим id");
+        if (!userStorage.isUserExists(friendId)) {
+            throw new UserOrFilmNotFoundException("Попытка исключить из друзей пользователя с несуществующим id");
         }
         if (!userStorage.isUserAlreadyInFriends(userId, friendId)) {
-            throw new TryingToReFriendException("Попытка исключить из друзей пользователя не находящегося в списке друзей");
+            throw new ReFriendException("Попытка исключить из друзей пользователя не находящегося в списке друзей");
         }
         userStorage.excludeFromFriends(userId, friendId);
     }

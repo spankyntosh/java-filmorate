@@ -5,14 +5,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.yandex.practicum.filmorate.exceptions.OnExceptionResponse;
-import ru.yandex.practicum.filmorate.exceptions.FilmOrUserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ErrorResponse;
+import ru.yandex.practicum.filmorate.exceptions.UserOrFilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.UserReLikeException;
+import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
@@ -42,23 +43,23 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserOrFilmAlreadyExistException.class)
-    public ResponseEntity<OnExceptionResponse> handleAlreadyExistEntities(UserOrFilmAlreadyExistException exception) {
-        OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAlreadyExistEntities(UserOrFilmAlreadyExistException exception) {
         log.warn(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(FilmOrUserNotFoundException.class)
-    public ResponseEntity<OnExceptionResponse> handleIncorrectId(FilmOrUserNotFoundException exception) {
-        OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+    @ExceptionHandler(UserOrFilmNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleIncorrectId(UserOrFilmNotFoundException exception) {
         log.warn(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(UserReLikeException.class)
-    public ResponseEntity<OnExceptionResponse> handleReLikeException(UserReLikeException exception) {
-        OnExceptionResponse response = new OnExceptionResponse(exception.getMessage());
+    @ExceptionHandler(ReLikeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleReLikeException(ReLikeException exception) {
         log.warn(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(exception.getMessage());
     }
 }
