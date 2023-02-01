@@ -34,6 +34,6 @@ public class UpdateUserInfoWithIncorrectIdTest {
                 .content(body);
         this.mockMvc.perform(builder)
                 .andExpect(status().is(404))
-                .andExpect(jsonPath("$.message", is("Попытка обновить информацию по пользователю с несуществующим id")));
+                .andExpect(jsonPath("$.message", is("Пользователь с id 125 не найден")));
     }
 }
