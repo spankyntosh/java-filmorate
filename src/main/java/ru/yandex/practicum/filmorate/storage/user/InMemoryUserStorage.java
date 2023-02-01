@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private int idCounter = 1;
-    Map<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
 
     @Override
     public Collection<User> getUsers() {

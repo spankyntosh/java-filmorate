@@ -1,24 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
-import javax.websocket.server.PathParam;
 import java.util.Collection;
 
 
 @RestController
 @RequestMapping("/films")
-@Validated
+@Slf4j
 public class FilmController {
 
-    FilmService filmService;
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+    private final FilmService filmService;
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.yandex.practicum.filmorate.exceptions.ErrorResponse;
-import ru.yandex.practicum.filmorate.exceptions.UserOrFilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 
@@ -49,9 +49,9 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(UserOrFilmNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIncorrectId(UserOrFilmNotFoundException exception) {
+    public ErrorResponse handleIncorrectId(EntityNotFoundException exception) {
         log.warn(exception.getMessage());
         return new ErrorResponse(exception.getMessage());
     }

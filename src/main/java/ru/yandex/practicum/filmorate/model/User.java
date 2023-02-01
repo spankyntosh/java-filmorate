@@ -11,15 +11,15 @@ import java.util.Set;
 @Data
 public class User {
 
-    int id;
+    private int id;
     @Email(message = "Неверно указан формат электронной почты")
-    String email;
+    private String email;
     @NotBlank(message = "логин пользователя не должен быть пустым")
     @Pattern(regexp = "\\S*", message = "в логине не должно содержаться пробелов")
-    String login;
-    String name;
+    private String login;
+    private String name;
     @Past(message = "Дата дня рождения не может быть в будущем или сегодняшним днём")
-    LocalDate birthday;
-    Set<Integer> friends;
+    private LocalDate birthday;
+    private Set<Integer> friends;
 
 }

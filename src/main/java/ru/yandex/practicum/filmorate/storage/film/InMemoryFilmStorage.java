@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private int idCounter = 1;
-     final Map<Integer, Film> filmsCollection = new HashMap<>();
+    private final Map<Integer, Film> filmsCollection = new HashMap<>();
 
     @Override
     public Collection<Film> getFilms() {
