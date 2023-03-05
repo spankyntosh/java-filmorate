@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate.dao.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.MpaDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.MPAMapper;
 import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.util.Collection;
 import java.util.List;
-
+@Component
 public class MpaDAOImpl implements MpaDAO {
 
     private final JdbcTemplate jdbcTemplate;
@@ -29,7 +30,7 @@ public class MpaDAOImpl implements MpaDAO {
     @Override
     public MPA findById(Integer mpaId) {
         String statement = "SELECT * "
-                         + "FROM mpa_ratings"
+                         + "FROM mpa_ratings "
                          + "WHERE id = ?";
 
         return jdbcTemplate.queryForObject(statement, new MPAMapper(), mpaId);
@@ -39,10 +40,10 @@ public class MpaDAOImpl implements MpaDAO {
     @Override
     public boolean isMpaExists(Integer mpaId) {
         String statement = "SELECT * "
-                         + "FROM mpa_ratings"
+                         + "FROM mpa_ratings "
                          + "WHERE id = ?";
 
-        List<MPA> list = jdbcTemplate.queryForList(statement, MPA.class, mpaId);
+        List<MPA> list = jdbcTemplate.query(statement, new MPAMapper(), mpaId);
         return !list.isEmpty();
     }
 }

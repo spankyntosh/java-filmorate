@@ -31,6 +31,9 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User addUser(User user) {
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("users").usingGeneratedKeyColumns("id");
         int filmId = insert.executeAndReturnKey(user.toMap()).intValue();
         user.setId(filmId);

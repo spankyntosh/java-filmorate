@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.dao.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Component
 public class FilmGenreDAOImpl implements FilmGenreDAO {
@@ -25,7 +28,9 @@ public class FilmGenreDAOImpl implements FilmGenreDAO {
                          + "VALUES (?, ?)";
 
         for (Genre genre : genres) {
-            jdbcTemplate.update(statement, filmId, genre.getId());
+            if (!isRecordExists(filmId, genre.getId())) {
+                jdbcTemplate.update(statement, filmId, genre.getId());
+            }
         }
     }
 
@@ -47,5 +52,21 @@ public class FilmGenreDAOImpl implements FilmGenreDAO {
                          + "WHERE film_id = ?";
 
         jdbcTemplate.update(statement, filmId);
+    }
+
+    private boolean isRecordExists(Integer filmId, Integer genreId) {
+        String statement = "SELECT film_id "
+                + "FROM films_genres "
+                + "WHERE film_id = ? AND genre_id = ?";
+
+        ResultSetExtractor<List<Integer>> extractor = rs -> {
+            List<Integer> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(rs.getInt("film_id"));
+            }
+            return list;
+        };
+        List<Integer> idList = jdbcTemplate.query(statement,extractor, filmId, genreId);
+        return !idList.isEmpty();
     }
 }

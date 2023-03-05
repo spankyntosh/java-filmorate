@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
+import lombok.extern.slf4j.Slf4j;
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -11,12 +13,14 @@ import ru.yandex.practicum.filmorate.dao.LikeDAO;
 import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Component
 public class FilmDAOImpl implements FilmDAO {
 
@@ -59,13 +63,20 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public Collection<Film> getPopularFilms(Integer count) {
-        String statement = "SELECT * "
+/*        String statement = "SELECT * "
                 + "FROM films "
                 + "WHERE id IN "
                 + "(SELECT film_id "
                 + "FROM likes "
                 + "GROUP BY film_id "
                 + "ORDER BY COUNT(user_id) DESC) "
+                + "LIMIT ?";*/
+
+        String statement = "SELECT * "
+                + "FROM films as f "
+                + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                + "GROUP BY f.id "
+                + "ORDER BY COUNT(l.user_id) DESC "
                 + "LIMIT ?";
 
         List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper(), count);
@@ -84,7 +95,7 @@ public class FilmDAOImpl implements FilmDAO {
             mpaFilmDAO.addMpaFilmRecord(film.getId(), film.getMpa().getId());
         }
         if (film.getGenres() != null) {
-            filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres());
+            filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres().stream().distinct().collect(Collectors.toList()));
         }
         return film;
     }
@@ -96,7 +107,7 @@ public class FilmDAOImpl implements FilmDAO {
                 + "WHERE id = ?";
 
         List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper(), filmId);
-        return filmList.isEmpty();
+        return !filmList.isEmpty();
     }
 
     @Override
@@ -118,10 +129,19 @@ public class FilmDAOImpl implements FilmDAO {
         }
 
         filmGenreDAO.deleteRecordsByFilmId(film.getId());
-        if (!film.getGenres().isEmpty()) {
+        Optional<Collection<Genre>> optionalCollection = Optional.ofNullable(film.getGenres());
+        if (optionalCollection.isPresent()) {
+            film.setGenres(film.getGenres().stream().sorted((o1, o2) -> {
+                if (o1.getId() > o2.getId()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            })
+                    .distinct()
+                    .collect(Collectors.toList()));
             film.getGenres().stream().forEach(genre -> filmGenreDAO.addFilmGenreRecord(film.getId(), List.of(genre)));
         }
-
         return film;
     }
 
@@ -134,7 +154,7 @@ public class FilmDAOImpl implements FilmDAO {
         ResultSetExtractor<List<Integer>> extractor = rs -> {
             List<Integer> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(rs.getInt("user_id_who_send"));
+                list.add(rs.getInt("user_id"));
             }
             return list;
         };

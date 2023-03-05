@@ -32,7 +32,7 @@ public class GenreDAOImpl implements GenreDAO {
     @Override
     public Genre findById(Integer genreId) {
         String statement = "SELECT * "
-                         + "FROM genres"
+                         + "FROM genres "
                          + "WHERE id = ?";
 
         return jdbcTemplate.queryForObject(statement, new GenreMapper(), genreId);
@@ -41,10 +41,10 @@ public class GenreDAOImpl implements GenreDAO {
     @Override
     public boolean isGenreExists(Integer genreId) {
         String statement = "SELECT * "
-                         + "FROM genres"
+                         + "FROM genres "
                          + "WHERE id = ?";
 
-        List<Genre> genreList = jdbcTemplate.queryForList(statement, Genre.class, genreId);
+        List<Genre> genreList = jdbcTemplate.query(statement, new GenreMapper(), genreId);
         return !genreList.isEmpty();
     }
 }

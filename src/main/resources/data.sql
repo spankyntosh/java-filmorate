@@ -5,9 +5,9 @@ VALUES ('PG');
 INSERT INTO mpa_ratings (name)
 VALUES ('PG-13');
 INSERT INTO mpa_ratings (name)
-VALUES ('NC-17');
-INSERT INTO mpa_ratings (name)
 VALUES ('R');
+INSERT INTO mpa_ratings (name)
+VALUES ('NC-17');
 
 INSERT INTO genres (name)
 VALUES ('Комедия');

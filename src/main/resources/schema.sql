@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS friendships (
     user_id_who_send INT,
     user_id_to_whom_send INT,
     status varchar (20),
-    FOREIGN KEY (user_id_who_send) REFERENCES users (id),
-    FOREIGN KEY (user_id_to_whom_send) REFERENCES users (id),
+    FOREIGN KEY (user_id_who_send) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id_to_whom_send) REFERENCES users (id) ON DELETE CASCADE,
     PRIMARY KEY (user_id_who_send, user_id_to_whom_send)
 );
 
@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS films (
 CREATE TABLE IF NOT EXISTS films_genres (
     film_id INT,
     genre_id INT,
-    FOREIGN KEY (film_id) REFERENCES films (id),
-    FOREIGN KEY (genre_id) REFERENCES genres (id),
+    FOREIGN KEY (film_id) REFERENCES films (id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genres (id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, genre_id)
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS mpa_films (
 CREATE TABLE IF NOT EXISTS likes (
     user_id INT,
     film_id INT,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (film_id) REFERENCES users (id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (film_id) REFERENCES films (id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, film_id)
 );
