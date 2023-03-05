@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.DbFilmService;
 import javax.validation.Valid;
 import java.util.Collection;
 
@@ -14,9 +14,9 @@ import java.util.Collection;
 @Slf4j
 public class FilmController {
 
-    private final FilmService filmService;
+    private final DbFilmService filmService;
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(DbFilmService filmService) {
         this.filmService = filmService;
     }
 

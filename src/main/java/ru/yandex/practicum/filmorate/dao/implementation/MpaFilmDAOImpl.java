@@ -56,11 +56,7 @@ public class MpaFilmDAOImpl implements MpaFilmDAO {
                          + "WHERE film_id = ?";
 
         List<MpaFilm> list = jdbcTemplate.query(statement, new FilmMpaMapper(), filmId);
-        if (list.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !list.isEmpty();
     }
 
     @Override

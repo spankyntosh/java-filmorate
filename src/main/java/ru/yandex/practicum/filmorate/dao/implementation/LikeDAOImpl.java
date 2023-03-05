@@ -23,7 +23,7 @@ public class LikeDAOImpl implements LikeDAO {
 
     @Override
     public void addRecord(Integer filmId, Integer userId) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("likes");
         simpleJdbcInsert.execute(Map.of("film_id", filmId, "user_id", userId));
     }
 

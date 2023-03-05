@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.DbUserService;
 import javax.validation.Valid;
 import java.util.Collection;
 
@@ -13,9 +13,9 @@ import java.util.Collection;
 @Slf4j
 public class UserController {
 
-    private final UserService userService;
+    private final DbUserService userService;
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(DbUserService userService) {
         this.userService = userService;
     }
 

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDAO;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,7 +77,7 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public Film addFilmInfo(Film film) {
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("films").usingGeneratedKeyColumns("id");
         int filmId = insert.executeAndReturnKey(film.toMap()).intValue();
         film.setId(filmId);
         if (film.getMpa() != null) {
@@ -85,6 +87,16 @@ public class FilmDAOImpl implements FilmDAO {
             filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres());
         }
         return film;
+    }
+
+    @Override
+    public boolean isFilmExists(Integer filmId) {
+        String statement = "SELECT * "
+                + "FROM films "
+                + "WHERE id = ?";
+
+        List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper(), filmId);
+        return filmList.isEmpty();
     }
 
     @Override
@@ -111,6 +123,24 @@ public class FilmDAOImpl implements FilmDAO {
         }
 
         return film;
+    }
+
+    @Override
+    public boolean isFilmAlreadyHaveLikeFromUser(Integer filmId, Integer userId) {
+        String statement = "SELECT user_id "
+                + "FROM likes "
+                + "WHERE film_id = ?";
+
+        ResultSetExtractor<List<Integer>> extractor = rs -> {
+            List<Integer> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(rs.getInt("user_id_who_send"));
+            }
+            return list;
+        };
+        List<Integer> idList = jdbcTemplate.query(statement,extractor, filmId);
+        return idList.contains(userId);
+
     }
 
     @Override

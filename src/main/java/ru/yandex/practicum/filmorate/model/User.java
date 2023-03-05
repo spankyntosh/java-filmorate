@@ -10,6 +10,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -29,11 +31,12 @@ public class User {
     private LocalDate birthday;
     private Set<Integer> friends;
 
-    public User(int id, String name, String login, LocalDate birthday, String email) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("login", this.login);
+        map.put("name", this.name);
+        map.put("birthday", this.birthday);
+        map.put("email", this.email);
+        return map;
     }
 }
