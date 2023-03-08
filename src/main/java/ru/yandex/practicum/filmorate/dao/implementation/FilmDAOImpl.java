@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -39,14 +38,11 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public Collection<Film> getFilms() {
+
         String statement = "SELECT * "
                          + "FROM films";
 
-        List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper());
-        return filmList.stream()
-                .peek(film -> film.setMpa(mpaFilmDAO.getMpaByFilmId(film.getId())))
-                .peek(film -> film.setGenres(filmGenreDAO.getFilmGenres(film.getId())))
-                .collect(Collectors.toList());
+        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO));
     }
 
     @Override
@@ -59,31 +55,6 @@ public class FilmDAOImpl implements FilmDAO {
         film.setMpa(mpaFilmDAO.getMpaByFilmId(filmId));
         film.setGenres(filmGenreDAO.getFilmGenres(filmId));
         return film;
-    }
-
-    @Override
-    public Collection<Film> getPopularFilms(Integer count) {
-/*        String statement = "SELECT * "
-                + "FROM films "
-                + "WHERE id IN "
-                + "(SELECT film_id "
-                + "FROM likes "
-                + "GROUP BY film_id "
-                + "ORDER BY COUNT(user_id) DESC) "
-                + "LIMIT ?";*/
-
-        String statement = "SELECT * "
-                + "FROM films as f "
-                + "LEFT JOIN likes AS l ON f.id = l.film_id "
-                + "GROUP BY f.id "
-                + "ORDER BY COUNT(l.user_id) DESC "
-                + "LIMIT ?";
-
-        List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper(), count);
-        return filmList.stream()
-                .peek(film -> film.setMpa(mpaFilmDAO.getMpaByFilmId(film.getId())))
-                .peek(film -> film.setGenres(filmGenreDAO.getFilmGenres(film.getId())))
-                .collect(Collectors.toList());
     }
 
     @Override

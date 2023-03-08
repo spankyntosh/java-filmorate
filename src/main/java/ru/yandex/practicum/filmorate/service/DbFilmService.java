@@ -1,9 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDAO;
+import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
+import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
 import ru.yandex.practicum.filmorate.dao.UserDAO;
+import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
@@ -16,11 +20,17 @@ public class DbFilmService {
 
     private final FilmDAO filmDAO;
     private final UserDAO userDAO;
+    private final MpaFilmDAO mpaFilmDAO;
+    private final FilmGenreDAO filmGenreDAO;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO) {
+    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
+        this.mpaFilmDAO = mpaFilmDAO;
+        this.filmGenreDAO = filmGenreDAO;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Collection<Film> getFilms() {
@@ -35,7 +45,15 @@ public class DbFilmService {
     }
 
     public Collection<Film> getPopularFilms(Integer count) {
-        return filmDAO.getPopularFilms(count);
+
+        String statement = "SELECT f.* "
+                + "FROM films as f "
+                + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                + "GROUP BY f.id "
+                + "ORDER BY COUNT(l.user_id) DESC "
+                + "LIMIT ?";
+
+        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), count);
     }
 
     public Film addFilm(Film film) {

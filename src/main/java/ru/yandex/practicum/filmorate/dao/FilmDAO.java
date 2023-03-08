@@ -8,7 +8,6 @@ public interface FilmDAO {
 
     Collection<Film> getFilms();
     Film getFilmById(Integer filmId);
-    Collection<Film> getPopularFilms(Integer count);
     Film addFilmInfo(Film film);
     boolean isFilmExists(Integer filmId);
     Film updateFilmInfo(Film film);
