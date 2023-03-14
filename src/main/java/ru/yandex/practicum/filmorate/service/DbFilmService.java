@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
 public class DbFilmService {
@@ -74,6 +75,14 @@ public class DbFilmService {
             throw new EntityNotFoundException("Попытка обновить информацию по фильму с несуществующим id фильма");
         }
         return filmDAO.updateFilmInfo(film);
+    }
+
+    public Film deleteFilm(Integer filmId) {
+        Film film = filmDAO.delete(filmId);
+        if (Objects.isNull(film)) {
+            throw new EntityNotFoundException(String.format("Попытка удалить фильм с несуществующим id = %d", filmId));
+        }
+        return film;
     }
 
     public void addLike(Integer filmId, Integer userId) {

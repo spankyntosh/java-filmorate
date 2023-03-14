@@ -41,6 +41,12 @@ public class FilmController {
         return filmService.addFilm(film);
     }
 
+    @DeleteMapping("/{id}")
+    public Film deleteFilm(@PathVariable Integer id) {
+        log.info(String.format("Пришёл запрос на удаление фильма по id = %d", id));
+        return filmService.deleteFilm(id);
+    }
+
     @PutMapping
     public Film updateFilmInfo(@Valid @RequestBody Film film) {
         log.info("Пришёл запрос на изменение информации по фильму");

@@ -9,6 +9,7 @@ public interface FilmDAO {
     Collection<Film> getFilms();
     Film getFilmById(Integer filmId);
     Film addFilmInfo(Film film);
+    Film delete(Integer id);
     boolean isFilmExists(Integer filmId);
     Film updateFilmInfo(Film film);
     boolean isFilmAlreadyHaveLikeFromUser(Integer filmId, Integer userId);

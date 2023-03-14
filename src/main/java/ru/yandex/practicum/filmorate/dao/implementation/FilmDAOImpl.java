@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 public class FilmDAOImpl implements FilmDAO {
@@ -40,7 +41,7 @@ public class FilmDAOImpl implements FilmDAO {
     public Collection<Film> getFilms() {
 
         String statement = "SELECT * "
-                         + "FROM films";
+                + "FROM films";
 
         return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO));
     }
@@ -48,8 +49,8 @@ public class FilmDAOImpl implements FilmDAO {
     @Override
     public Film getFilmById(Integer filmId) {
         String statement = "SELECT * "
-                         + "FROM films "
-                         + "WHERE id = ?";
+                + "FROM films "
+                + "WHERE id = ?";
         Film film = jdbcTemplate.queryForObject(statement, new FilmMapper(), filmId);
 
         film.setMpa(mpaFilmDAO.getMpaByFilmId(filmId));
@@ -72,6 +73,19 @@ public class FilmDAOImpl implements FilmDAO {
     }
 
     @Override
+    public Film delete(Integer id) {
+        if (!isFilmExists(id)) {
+            return null;
+        }
+        Film film = getFilmById(id);
+
+        String deleteQuery = "DELETE FROM films WHERE id = ?";
+        jdbcTemplate.update(deleteQuery, id);
+
+        return film;
+    }
+
+    @Override
     public boolean isFilmExists(Integer filmId) {
         String statement = "SELECT * "
                 + "FROM films "
@@ -84,7 +98,7 @@ public class FilmDAOImpl implements FilmDAO {
     @Override
     public Film updateFilmInfo(Film film) {
         String statement = "UPDATE films "
-                         + "SET name = ?, description = ?, duration = ?, release_date = ? WHERE id = ?";
+                + "SET name = ?, description = ?, duration = ?, release_date = ? WHERE id = ?";
 
         jdbcTemplate.update(statement
                 , film.getName()
@@ -103,12 +117,12 @@ public class FilmDAOImpl implements FilmDAO {
         Optional<Collection<Genre>> optionalCollection = Optional.ofNullable(film.getGenres());
         if (optionalCollection.isPresent()) {
             film.setGenres(film.getGenres().stream().sorted((o1, o2) -> {
-                if (o1.getId() > o2.getId()) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            })
+                        if (o1.getId() > o2.getId()) {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    })
                     .distinct()
                     .collect(Collectors.toList()));
             film.getGenres().stream().forEach(genre -> filmGenreDAO.addFilmGenreRecord(film.getId(), List.of(genre)));
@@ -129,7 +143,7 @@ public class FilmDAOImpl implements FilmDAO {
             }
             return list;
         };
-        List<Integer> idList = jdbcTemplate.query(statement,extractor, filmId);
+        List<Integer> idList = jdbcTemplate.query(statement, extractor, filmId);
         return idList.contains(userId);
 
     }

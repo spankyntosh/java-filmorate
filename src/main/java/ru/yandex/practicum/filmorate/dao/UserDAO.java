@@ -8,6 +8,7 @@ public interface UserDAO {
 
     Collection<User> getUsers();
     User addUser(User user);
+    User delete(Integer id);
     User updateUserInfo(User user);
     boolean isUserExists(Integer userId);
     User getUserById(Integer userId);
