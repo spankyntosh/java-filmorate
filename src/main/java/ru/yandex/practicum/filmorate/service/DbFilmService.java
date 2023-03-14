@@ -3,17 +3,18 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.FilmDAO;
-import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
-import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
-import ru.yandex.practicum.filmorate.dao.UserDAO;
+import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ReFriendException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.lang.Integer.compare;
 
 @Service
 public class DbFilmService {
@@ -22,14 +23,17 @@ public class DbFilmService {
     private final UserDAO userDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
+    private final FriendshipDAO friendshipDAO;
     private final JdbcTemplate jdbcTemplate;
 
+
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
+    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, FriendshipDAO friendshipDAO, JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
+        this.friendshipDAO  = friendshipDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -100,5 +104,28 @@ public class DbFilmService {
             throw new ReLikeException(String.format("у фильма с id %d уже отсутствует лайк от пользователя с id %d", filmId, userId));
         }
         filmDAO.removeLike(filmId, userId);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {                                                //реализация для filmDAOImpl
+        if (!userDAO.isUserExists(userId) || !userDAO.isUserExists(friendId)) {                                         //проверяем существование пользователей
+            throw new EntityNotFoundException(String.format("Не найден один из пользователей %d, %d", userId, friendId));
+        }
+        if (!friendshipDAO.isUserAlreadyInFriends(userId, friendId)) {                                                  //проверяем являются ли пользователи друзьями
+            throw new ReFriendException("Попытка получить общие фильмы для пользователй не являющихся друзьями");
+        }
+
+        List<Film> commonFilms = new ArrayList<>();                                                                     //создаем пустой список
+        var allFilms = getFilms();                                                                                      //берем коолекцию всех фильмов из БД перевызвав метод этого сервисного класса
+        for (Film film : allFilms) {                                                                                    //находим "общие с другом" фильмы (те фильмы, у который лайки от обоих пользвателей) и кладем их в список
+            if (film.getLikes().contains(userId) && film.getLikes().contains(friendId)) {
+                commonFilms.add(film);
+            }
+        }
+        Comparator<Film> cmpFilmPopularity = Comparator.comparing(                                                      //компаратор для сравнения по популярности (количеству лайков)
+                Film::getLikes, (s1, s2) -> compare(s2.size(), s1.size())
+        );
+        return commonFilms.stream()                                                                                     //возвращаем отсортированный список
+                .sorted(cmpFilmPopularity)
+                .collect(Collectors.toList());
     }
 }
