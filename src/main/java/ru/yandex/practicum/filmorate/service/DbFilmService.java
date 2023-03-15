@@ -106,25 +106,25 @@ public class DbFilmService {
         filmDAO.removeLike(filmId, userId);
     }
 
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {                                                //реализация для filmDAOImpl
-        if (!userDAO.isUserExists(userId) || !userDAO.isUserExists(friendId)) {                                         //проверяем существование пользователей
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        if (!userDAO.isUserExists(userId) || !userDAO.isUserExists(friendId)) {
             throw new EntityNotFoundException(String.format("Не найден один из пользователей %d, %d", userId, friendId));
         }
-        if (!friendshipDAO.isUserAlreadyInFriends(userId, friendId)) {                                                  //проверяем являются ли пользователи друзьями
+        if (!friendshipDAO.isUserAlreadyInFriends(userId, friendId)) {
             throw new ReFriendException("Попытка получить общие фильмы для пользователй не являющихся друзьями");
         }
 
-        List<Film> commonFilms = new ArrayList<>();                                                                     //создаем пустой список
-        var allFilms = getFilms();                                                                                      //берем коолекцию всех фильмов из БД перевызвав метод этого сервисного класса
-        for (Film film : allFilms) {                                                                                    //находим "общие с другом" фильмы (те фильмы, у который лайки от обоих пользвателей) и кладем их в список
+        List<Film> commonFilms = new ArrayList<>();
+        var allFilms = getFilms();
+        for (Film film : allFilms) {
             if (film.getLikes().contains(userId) && film.getLikes().contains(friendId)) {
                 commonFilms.add(film);
             }
         }
-        Comparator<Film> cmpFilmPopularity = Comparator.comparing(                                                      //компаратор для сравнения по популярности (количеству лайков)
+        Comparator<Film> cmpFilmPopularity = Comparator.comparing(
                 Film::getLikes, (s1, s2) -> compare(s2.size(), s1.size())
         );
-        return commonFilms.stream()                                                                                     //возвращаем отсортированный список
+        return commonFilms.stream()
                 .sorted(cmpFilmPopularity)
                 .collect(Collectors.toList());
     }
