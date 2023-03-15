@@ -42,9 +42,9 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public Film deleteFilm(@PathVariable Integer id) {
+    public void deleteFilm(@PathVariable Integer id) {
         log.info(String.format("Пришёл запрос на удаление фильма по id = %d", id));
-        return filmService.deleteFilm(id);
+        filmService.deleteFilm(id);
     }
 
     @PutMapping

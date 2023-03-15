@@ -46,9 +46,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public User deleteUser(@PathVariable Integer id) {
+    public void deleteUser(@PathVariable Integer id) {
         log.info(String.format("Пришёл запрос на удаление пользователя по id = %d", id));
-        return userService.deleteUser(id);
+        userService.deleteUser(id);
     }
 
     @PutMapping

@@ -73,16 +73,9 @@ public class FilmDAOImpl implements FilmDAO {
     }
 
     @Override
-    public Film delete(Integer id) {
-        if (!isFilmExists(id)) {
-            return null;
-        }
-        Film film = getFilmById(id);
-
+    public void delete(Integer id) {
         String deleteQuery = "DELETE FROM films WHERE id = ?";
         jdbcTemplate.update(deleteQuery, id);
-
-        return film;
     }
 
     @Override

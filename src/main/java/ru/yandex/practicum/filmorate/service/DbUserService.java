@@ -69,12 +69,8 @@ public class DbUserService {
         return userDAO.updateUserInfo(user);
     }
 
-    public User deleteUser(Integer userId) {
-        User user = userDAO.delete(userId);
-        if (Objects.isNull(user)) {
-            throw new EntityNotFoundException(String.format("Попытка удалить пользователя с несуществующим id = %d", userId));
-        }
-        return user;
+    public void deleteUser(Integer userId) {
+        userDAO.delete(userId);
     }
 
     public void addFriend(Integer userId, Integer friendId) {

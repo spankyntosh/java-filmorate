@@ -77,12 +77,8 @@ public class DbFilmService {
         return filmDAO.updateFilmInfo(film);
     }
 
-    public Film deleteFilm(Integer filmId) {
-        Film film = filmDAO.delete(filmId);
-        if (Objects.isNull(film)) {
-            throw new EntityNotFoundException(String.format("Попытка удалить фильм с несуществующим id = %d", filmId));
-        }
-        return film;
+    public void deleteFilm(Integer filmId) {
+        filmDAO.delete(filmId);
     }
 
     public void addLike(Integer filmId, Integer userId) {

@@ -41,15 +41,9 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public User delete(Integer id) {
-        if (!isUserExists(id)) {
-            return null;
-        }
-        User user = getUserById(id);
+    public void delete(Integer id) {
         String deleteQuery = "DELETE FROM users WHERE id = ?";
         jdbcTemplate.update(deleteQuery, id);
-
-        return user;
     }
 
     @Override
