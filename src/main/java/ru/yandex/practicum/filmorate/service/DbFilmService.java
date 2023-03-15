@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDAO;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
@@ -13,8 +14,9 @@ import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.List;
 
 @Service
 public class DbFilmService {
@@ -105,5 +107,24 @@ public class DbFilmService {
             throw new ReLikeException(String.format("у фильма с id %d уже отсутствует лайк от пользователя с id %d", filmId, userId));
         }
         filmDAO.removeLike(filmId, userId);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        if (!userDAO.isUserExists(userId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", userId));
+        }
+        if (!userDAO.isUserExists(friendId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", friendId));
+        }
+
+        List<Film> commonFilms = new ArrayList<>();
+        String sql = "SELECT film_id " +
+                "FROM (SELECT film_id FROM likes WHERE user_id = ? INTERSECT SELECT film_id FROM likes WHERE user_id = ?) " +
+                "GROUP BY film_id ORDER BY COUNT(film_id) DESC";
+        SqlRowSet commonFilmsIdRow = jdbcTemplate.queryForRowSet(sql, userId, friendId);
+        while (commonFilmsIdRow.next()) {
+            commonFilms.add(getFilmById(commonFilmsIdRow.getInt("film_id")));
+        }
+        return commonFilms;
     }
 }

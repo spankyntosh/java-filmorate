@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.DbFilmService;
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -61,6 +62,14 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(
+            @RequestParam Integer userId,
+            @RequestParam Integer friendId) {
+        log.info("Пришёл запрос на получение общих для друзей фильмов отсортированных по популярности");
+        return filmService.getCommonFilms(userId, friendId);
     }
 
 }
