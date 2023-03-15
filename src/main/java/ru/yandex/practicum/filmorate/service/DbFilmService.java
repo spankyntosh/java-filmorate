@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ReFriendException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -23,17 +22,15 @@ public class DbFilmService {
     private final UserDAO userDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
-    private final FriendshipDAO friendshipDAO;
     private final JdbcTemplate jdbcTemplate;
 
 
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, FriendshipDAO friendshipDAO, JdbcTemplate jdbcTemplate) {
+    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
-        this.friendshipDAO  = friendshipDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -107,25 +104,27 @@ public class DbFilmService {
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        if (!userDAO.isUserExists(userId) || !userDAO.isUserExists(friendId)) {
-            throw new EntityNotFoundException(String.format("Не найден один из пользователей %d, %d", userId, friendId));
+        if (!userDAO.isUserExists(userId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", userId));
         }
-        if (!friendshipDAO.isUserAlreadyInFriends(userId, friendId)) {
-            throw new ReFriendException("Попытка получить общие фильмы для пользователй не являющихся друзьями");
+        if (!userDAO.isUserExists(friendId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", friendId));
         }
-
         List<Film> commonFilms = new ArrayList<>();
-        var allFilms = getFilms();
-        for (Film film : allFilms) {
-            if (film.getLikes().contains(userId) && film.getLikes().contains(friendId)) {
+        List<Film> allFilmList = new ArrayList<>(getFilms());
+        for (Film film : allFilmList) {
+            if (film.getLikes() != null && film.getLikes().contains(userId) && film.getLikes().contains(friendId)) {
                 commonFilms.add(film);
             }
         }
-        Comparator<Film> cmpFilmPopularity = Comparator.comparing(
-                Film::getLikes, (s1, s2) -> compare(s2.size(), s1.size())
-        );
-        return commonFilms.stream()
-                .sorted(cmpFilmPopularity)
-                .collect(Collectors.toList());
+        if (!commonFilms.isEmpty()) {
+            Comparator<Film> cmpFilmPopularity = Comparator.comparing(
+                    Film::getLikes, (s1, s2) -> compare(s2.size(), s1.size())
+            );
+            return commonFilms.stream()
+                    .sorted(cmpFilmPopularity)
+                    .collect(Collectors.toList());
+        } else
+            return commonFilms;
     }
 }

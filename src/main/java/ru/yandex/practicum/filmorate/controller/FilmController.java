@@ -50,6 +50,7 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        log.info("Пришёл запрос на добавление лайка фильму");
         filmService.addLike(id, userId);
     }
 
