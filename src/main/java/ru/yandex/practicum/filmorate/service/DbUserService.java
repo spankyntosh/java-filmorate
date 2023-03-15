@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
 public class DbUserService {
@@ -66,6 +67,10 @@ public class DbUserService {
             throw new EntityNotFoundException(String.format("Пользователь с id %d не найден", user.getId()));
         }
         return userDAO.updateUserInfo(user);
+    }
+
+    public void deleteUser(Integer userId) {
+        userDAO.delete(userId);
     }
 
     public void addFriend(Integer userId, Integer friendId) {

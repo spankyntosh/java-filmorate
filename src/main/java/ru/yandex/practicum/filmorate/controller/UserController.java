@@ -45,6 +45,12 @@ public class UserController {
         return userService.addUser(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Integer id) {
+        log.info(String.format("Пришёл запрос на удаление пользователя по id = %d", id));
+        userService.deleteUser(id);
+    }
+
     @PutMapping
     public User updateUserInfo(@Valid @RequestBody User user) {
         log.info("Пришёл запрос на изменение информации по пользователю");
