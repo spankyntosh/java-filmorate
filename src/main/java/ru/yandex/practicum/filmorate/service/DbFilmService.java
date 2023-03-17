@@ -2,12 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.FilmDAO;
-import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
-import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
-import ru.yandex.practicum.filmorate.dao.UserDAO;
+import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
@@ -25,14 +21,16 @@ public class DbFilmService {
     private final UserDAO userDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
+    private final LikeDAO likeDAO;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
+    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, LikeDAO likeDAO, JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
+        this.likeDAO = likeDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -116,15 +114,9 @@ public class DbFilmService {
         if (!userDAO.isUserExists(friendId)) {
             throw new EntityNotFoundException(String.format("Не найден пользователь %d", friendId));
         }
-
         List<Film> commonFilms = new ArrayList<>();
-        String sql = "SELECT film_id " +
-                "FROM (SELECT film_id FROM likes WHERE user_id = ? INTERSECT SELECT film_id FROM likes WHERE user_id = ?) " +
-                "GROUP BY film_id ORDER BY COUNT(film_id) DESC";
-        SqlRowSet commonFilmsIdRow = jdbcTemplate.queryForRowSet(sql, userId, friendId);
-        while (commonFilmsIdRow.next()) {
-            commonFilms.add(getFilmById(commonFilmsIdRow.getInt("film_id")));
-        }
+        var commonFilmsId = likeDAO.getCommonFilmsId(userId, friendId);
+        commonFilmsId.forEach(i -> commonFilms.add(getFilmById(i)));
         return commonFilms;
     }
 }
