@@ -3,10 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.FilmDAO;
-import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
-import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
-import ru.yandex.practicum.filmorate.dao.UserDAO;
+import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
@@ -14,7 +11,7 @@ import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
-import java.util.Objects;
+import java.util.List;
 
 @Service
 public class DbFilmService {
@@ -23,14 +20,16 @@ public class DbFilmService {
     private final UserDAO userDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
+    private final LikeDAO likeDAO;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
+    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, LikeDAO likeDAO, JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
+        this.likeDAO = likeDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -105,5 +104,15 @@ public class DbFilmService {
             throw new ReLikeException(String.format("у фильма с id %d уже отсутствует лайк от пользователя с id %d", filmId, userId));
         }
         filmDAO.removeLike(filmId, userId);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        if (!userDAO.isUserExists(userId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", userId));
+        }
+        if (!userDAO.isUserExists(friendId)) {
+            throw new EntityNotFoundException(String.format("Не найден пользователь %d", friendId));
+        }
+        return likeDAO.getCommonFilms(userId, friendId);
     }
 }
