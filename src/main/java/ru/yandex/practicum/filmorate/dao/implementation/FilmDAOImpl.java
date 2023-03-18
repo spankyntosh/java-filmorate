@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
 import ru.yandex.practicum.filmorate.dao.LikeDAO;
 import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -74,6 +75,9 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public void delete(Integer id) {
+        if (!isFilmExists(id)) {
+            throw new EntityNotFoundException("Попытка удалить фильм с несуществующим id фильма");
+        }
         String deleteQuery = "DELETE FROM films WHERE id = ?";
         jdbcTemplate.update(deleteQuery, id);
     }

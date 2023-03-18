@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.UserMapper;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -42,6 +43,9 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void delete(Integer id) {
+        if (!isUserExists(id)) {
+            throw new EntityNotFoundException("Попытка удалить пользователя с несуществующим id фильма");
+        }
         String deleteQuery = "DELETE FROM users WHERE id = ?";
         jdbcTemplate.update(deleteQuery, id);
     }
