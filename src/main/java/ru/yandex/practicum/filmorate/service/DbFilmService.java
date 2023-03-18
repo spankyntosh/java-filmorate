@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -114,9 +113,6 @@ public class DbFilmService {
         if (!userDAO.isUserExists(friendId)) {
             throw new EntityNotFoundException(String.format("Не найден пользователь %d", friendId));
         }
-        List<Film> commonFilms = new ArrayList<>();
-        var commonFilmsId = likeDAO.getCommonFilmsId(userId, friendId);
-        commonFilmsId.forEach(i -> commonFilms.add(getFilmById(i)));
-        return commonFilms;
+        return likeDAO.getCommonFilms(userId, friendId);
     }
 }

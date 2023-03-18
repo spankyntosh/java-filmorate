@@ -11,5 +11,5 @@ public interface LikeDAO {
     void addRecord(Integer filmId, Integer userId);
     Collection<Like> getRecord(Integer filmId);
     void deleteRecord(Integer filmId, Integer userId);
-    List<Integer> getCommonFilmsId (Integer userId, Integer friendId);
+    List<Film> getCommonFilms (Integer userId, Integer friendId);
 }
