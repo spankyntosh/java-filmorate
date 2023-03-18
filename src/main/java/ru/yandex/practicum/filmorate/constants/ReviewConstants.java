@@ -34,4 +34,8 @@ public class ReviewConstants {
     public static final String UPDATE_REVIEW_AFTER_ADD_DISLIKE = "UPDATE reviews r1 SET useful = -1 WHERE review_id = ?";
 
     public static final String UPDATE_REVIEW_AFTER_ADD_LIKE = "UPDATE reviews r1 SET useful = ((SELECT r2.useful FROM reviews r2 WHERE r1.review_id = r2.review_id) + 1) WHERE review_id = ?";
+
+    public static final String UPDATE_REVIEW_AFTER_DELETE_DISLIKE = "UPDATE reviews r1 SET useful = ((SELECT r2.useful FROM reviews r2 WHERE r1.review_id = r2.review_id) + 1) WHERE review_id = ?";
+
+    public static final String UPDATE_REVIEW_AFTER_DELETE_LIKE = "UPDATE reviews r1 SET useful = -1 WHERE review_id = ?";
 }

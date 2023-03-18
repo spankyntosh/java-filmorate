@@ -16,6 +16,12 @@ public interface ReviewDAO<T extends Review> {
     T getById(Long reviewId);
 
     void addLikeToReview(Integer reviewId, Integer userId);
+
     void addDisLikeToReview(Integer reviewId, Integer userId);
+
+    void deleteLikeToReview(Integer reviewId, Integer userId);
+
+    void deleteDisLikeToReview(Integer reviewId, Integer userId);
+
     void delete(Long reviewId);
 }

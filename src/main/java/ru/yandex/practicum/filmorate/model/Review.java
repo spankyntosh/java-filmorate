@@ -4,8 +4,6 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 public class Review {
@@ -25,8 +23,4 @@ public class Review {
     private Boolean isPositive;
 
     private Long useful;
-
-    private Set<Long> likes = new HashSet<>();
-
-
 }

@@ -179,6 +179,48 @@ public class ReviewDaoImpl implements ReviewDAO<Review> {
     }
 
     @Override
+    public void deleteLikeToReview(Integer reviewId, Integer userId) {
+        if (!checkUserExists(userId)) {
+            throw new EntityNotFoundException("Пользователь с идентификатором " + userId + " отсутствует");
+        }
+        if (!checkReviewExists(reviewId)) {
+            throw new EntityNotFoundException("Отзыв с идентификатором " + reviewId + " отсутствует");
+        }
+
+        jdbcTemplate.update(
+                ReviewConstants.DELETE_LIKE_FROM_REVIEW,
+                reviewId,
+                userId
+        );
+
+        jdbcTemplate.update(
+                ReviewConstants.UPDATE_REVIEW_AFTER_DELETE_LIKE,
+                reviewId
+        );
+    }
+
+    @Override
+    public void deleteDisLikeToReview(Integer reviewId, Integer userId) {
+        if (!checkUserExists(userId)) {
+            throw new EntityNotFoundException("Пользователь с идентификатором " + userId + " отсутствует");
+        }
+        if (!checkReviewExists(reviewId)) {
+            throw new EntityNotFoundException("Отзыв с идентификатором " + reviewId + " отсутствует");
+        }
+
+        jdbcTemplate.update(
+                ReviewConstants.DELETE_DISLIKE_FROM_REVIEW,
+                reviewId,
+                userId
+        );
+
+        jdbcTemplate.update(
+                ReviewConstants.UPDATE_REVIEW_AFTER_DELETE_DISLIKE,
+                reviewId
+        );
+    }
+
+    @Override
     public void delete(Long reviewId) {
         if (!checkReviewExists(Math.toIntExact(reviewId))) {
             throw new EntityNotFoundException("Отзыв с идентификатором " + reviewId + " отсутствует");

@@ -2,18 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.ReviewDAO;
 import ru.yandex.practicum.filmorate.model.Review;
-
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
-@Qualifier("daoReviewStorage")
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewDAO<Review> reviewStorage;
@@ -44,6 +41,14 @@ public class ReviewService {
 
     public void addDisLikeToReview(Integer reviewId, Integer userId) {
         reviewStorage.addDisLikeToReview(reviewId, userId);
+    }
+
+    public void deleteLikeToReview(Integer reviewId, Integer userId) {
+        reviewStorage.deleteLikeToReview(reviewId, userId);
+    }
+
+    public void deleteDisLikeToReview(Integer reviewId, Integer userId) {
+        reviewStorage.deleteDisLikeToReview(reviewId, userId);
     }
 
     public void delete(Long reviewId) {

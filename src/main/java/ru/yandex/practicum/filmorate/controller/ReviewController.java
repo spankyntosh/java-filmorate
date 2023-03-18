@@ -52,6 +52,18 @@ public class ReviewController {
         reviewService.addDisLikeToReview(reviewId, userId);
     }
 
+    @DeleteMapping(value = "reviews/{reviewId}/like/{userId}")
+    public void deleteLikeToReview(@PathVariable Integer reviewId, @PathVariable Integer userId) {
+        log.info("Endpoint request received: 'DELETE reviews/{}/like/{}'", reviewId, userId);
+        reviewService.deleteLikeToReview(reviewId, userId);
+    }
+
+    @DeleteMapping(value = "reviews/{reviewId}/dislike/{userId}")
+    public void deleteDisLikeToReview(@PathVariable Integer reviewId, @PathVariable Integer userId) {
+        log.info("Endpoint request received: 'DELETE reviews/{}/dislike/{}'", reviewId, userId);
+        reviewService.deleteDisLikeToReview(reviewId, userId);
+    }
+
     @DeleteMapping(value = "reviews/{reviewId}")
     public void removeReview(@PathVariable Long reviewId) {
         log.info("Endpoint request received: 'DELETE reviews/{}'", reviewId);
