@@ -6,19 +6,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.FilmDAO;
-import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
-import ru.yandex.practicum.filmorate.dao.LikeDAO;
-import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
+import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,14 +23,23 @@ public class FilmDAOImpl implements FilmDAO {
     private final FilmGenreDAO filmGenreDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final LikeDAO likeDAO;
+    private final DirectorDAO directorDAO;
     private final JdbcTemplate jdbcTemplate;
+    private final FilmDirectorDAO filmDirectorDAO;
 
     @Autowired
-    public FilmDAOImpl(JdbcTemplate jdbcTemplate, FilmGenreDAO filmGenreDAO, MpaFilmDAO mpaFilmDAO, LikeDAO likeDAO) {
+    public FilmDAOImpl(JdbcTemplate jdbcTemplate
+            , FilmGenreDAO filmGenreDAO
+            , MpaFilmDAO mpaFilmDAO
+            , LikeDAO likeDAO
+            , DirectorDAO directorDAO
+            , FilmDirectorDAO filmDirectorDAO) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmGenreDAO = filmGenreDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.likeDAO = likeDAO;
+        this.directorDAO = directorDAO;
+        this.filmDirectorDAO  = filmDirectorDAO;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class FilmDAOImpl implements FilmDAO {
         String statement = "SELECT * "
                 + "FROM films";
 
-        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO));
+        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO));
     }
 
     @Override
@@ -56,7 +60,31 @@ public class FilmDAOImpl implements FilmDAO {
 
         film.setMpa(mpaFilmDAO.getMpaByFilmId(filmId));
         film.setGenres(filmGenreDAO.getFilmGenres(filmId));
+        film.setDirectors(filmDirectorDAO.getFilmDirectors(filmId));
         return film;
+    }
+
+    @Override
+    public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
+
+        String statement = null;
+        if (sortBy.contentEquals("year")) {
+            statement = "SELECT * "
+                    + "FROM films AS f "
+                    + "LEFT JOIN films_directors AS fd ON f.id = fd.film_id "
+                    + "WHERE fd.director_id = ?"
+                    + "ORDER BY release_date";
+        } else {
+            statement = "SELECT f.* "
+                    + "FROM films as f "
+                    + "LEFT JOIN films_directors AS fd ON f.id = fd.film_id "
+                    + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                    + "WHERE fd.director_id = ?"
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC";
+        }
+
+        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), directorId);
     }
 
     @Override
@@ -69,6 +97,14 @@ public class FilmDAOImpl implements FilmDAO {
         }
         if (film.getGenres() != null) {
             filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres().stream().distinct().collect(Collectors.toList()));
+        }
+        if (film.getDirectors() != null) {
+            for (Director director : film.getDirectors()) {
+                if (!directorDAO.isDirectorExists(director.getId())) {
+                    throw new EntityNotFoundException(String.format("Режиссёр с идентификатором %d не найден", director.getId()));
+                }
+                insertIntoFilmsDirectorsTable(filmId, director.getId());
+            }
         }
         return film;
     }
@@ -124,6 +160,20 @@ public class FilmDAOImpl implements FilmDAO {
                     .collect(Collectors.toList()));
             film.getGenres().stream().forEach(genre -> filmGenreDAO.addFilmGenreRecord(film.getId(), List.of(genre)));
         }
+
+        filmDirectorDAO.deleteRecords(film.getId());
+        if (film.getDirectors() !=  null) {
+            for (Director director : film.getDirectors()) {
+                filmDirectorDAO.addRecord(director.getId(), film.getId());
+            }
+        }
+
+        if (film.getGenres() == null) {
+            film.setGenres(new ArrayList<>());
+        }
+        if (film.getDirectors() == null) {
+            film.setDirectors(new ArrayList<>());
+        }
         return film;
     }
 
@@ -155,5 +205,13 @@ public class FilmDAOImpl implements FilmDAO {
         likeDAO.deleteRecord(filmId, userId);
     }
 
+    private void insertIntoFilmsDirectorsTable(Integer filmId, Integer directorId) {
+        HashMap<String, Integer> map = new HashMap<>();
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("films_directors");
+
+        map.put("film_id", filmId);
+        map.put("director_id", directorId);
+        insert.execute(map);
+    }
 
 }

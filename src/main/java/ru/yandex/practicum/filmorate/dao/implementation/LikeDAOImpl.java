@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.FilmDirectorDAO;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
 import ru.yandex.practicum.filmorate.dao.LikeDAO;
 import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
@@ -21,12 +22,14 @@ public class LikeDAOImpl implements LikeDAO {
 
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
+    private final FilmDirectorDAO filmDirectorDAO;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public LikeDAOImpl(MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, JdbcTemplate jdbcTemplate) {
+    public LikeDAOImpl(MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, FilmDirectorDAO filmDirectorDAO, JdbcTemplate jdbcTemplate) {
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
+        this.filmDirectorDAO = filmDirectorDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -63,6 +66,6 @@ public class LikeDAOImpl implements LikeDAO {
                    + "GROUP BY f.id "
                    + "ORDER BY COUNT(l.user_id) DESC";
 
-        return jdbcTemplate.query(sql, new FilmMapper(mpaFilmDAO, filmGenreDAO), userId, friendId);
+        return jdbcTemplate.query(sql, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), userId, friendId);
     }
 }

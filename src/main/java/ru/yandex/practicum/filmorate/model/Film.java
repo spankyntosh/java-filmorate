@@ -31,6 +31,7 @@ public class Film {
     private double duration;
     private MPA mpa;
     private Collection<Genre> genres;
+    private Collection<Director> directors;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, double duration) {
         this.id = id;

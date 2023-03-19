@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.dao.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
+import ru.yandex.practicum.filmorate.dao.DirectorDAO;
+import ru.yandex.practicum.filmorate.dao.FilmDirectorDAO;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
 import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -16,13 +19,15 @@ public class FilmMapper implements RowMapper<Film> {
 
     private MpaFilmDAO mpaFilmDAO;
     private FilmGenreDAO filmGenreDAO;
+    private FilmDirectorDAO filmDirectorDAO;
 
     public FilmMapper() {
     }
 
-    public FilmMapper(MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO) {
+    public FilmMapper(MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, FilmDirectorDAO filmDirectorDAO) {
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
+        this.filmDirectorDAO = filmDirectorDAO;
     }
 
     @Override
@@ -37,7 +42,7 @@ public class FilmMapper implements RowMapper<Film> {
         } else {
             MPA mpa = mpaFilmDAO.getMpaByFilmId(rs.getInt("id"));
             Collection<Genre> genres = filmGenreDAO.getFilmGenres(rs.getInt("id"));
-
+            Collection<Director> directors = filmDirectorDAO.getFilmDirectors(rs.getInt("id"));
             return new Film()
                     .toBuilder()
                     .id(rs.getInt("id"))
@@ -47,6 +52,7 @@ public class FilmMapper implements RowMapper<Film> {
                     .duration(rs.getInt("duration"))
                     .mpa(mpa)
                     .genres(genres)
+                    .directors(directors)
                     .build();
         }
 

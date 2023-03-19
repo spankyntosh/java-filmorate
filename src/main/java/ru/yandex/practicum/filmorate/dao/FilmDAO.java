@@ -8,6 +8,7 @@ public interface FilmDAO {
 
     Collection<Film> getFilms();
     Film getFilmById(Integer filmId);
+    Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy);
     Film addFilmInfo(Film film);
     void delete(Integer id);
     boolean isFilmExists(Integer filmId);
