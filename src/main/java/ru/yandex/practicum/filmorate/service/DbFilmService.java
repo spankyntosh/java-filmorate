@@ -116,7 +116,7 @@ public class DbFilmService {
                     + "ORDER BY COUNT(l.user_id) DESC "
                     + "LIMIT ?";
 
-            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), count);
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), count);
         }
     }
 
