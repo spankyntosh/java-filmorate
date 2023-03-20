@@ -64,7 +64,7 @@ public class DbFilmService {
             throw new EntityNotFoundException("Режиссёр с таким идентификатором не найден");
         }
         if (sortBy == null || !(sortBy.contentEquals("year") || sortBy.contentEquals("likes"))) {
-            throw new QueryParamException(String.format("Допустимые значения для sortBy likes или year"));
+            throw new QueryParamException("Допустимые значения для sortBy likes или year");
         }
         return filmDAO.getDirectorAllFilms(directorId, sortBy);
         

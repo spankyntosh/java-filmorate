@@ -19,7 +19,7 @@ import java.util.*;
 @Builder(toBuilder = true)
 public class Film {
 
-    private Set<Integer> likes;
+    private Set<Integer> likes; //Неиспользуемое поле. Оставлено только для совместимости с inMemory реализацией
     private Integer id;
     @NotBlank(message = "Название фильма не должно быть пустым")
     private String name;

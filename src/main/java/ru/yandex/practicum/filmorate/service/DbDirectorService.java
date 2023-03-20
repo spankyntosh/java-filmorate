@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exceptions.RequiredBodyFieldAbsenceExceptio
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
 public class DbDirectorService {
@@ -31,7 +32,7 @@ public class DbDirectorService {
     }
 
     public Director addDirectorInfo(Director director) {
-        if (director.getName() == null || director.getName().isEmpty()) {
+        if (Objects.isNull(director.getName()) || director.getName().isEmpty()) {
             throw new RequiredBodyFieldAbsenceException("Поле с именем режиссёра отсутствует или имеет пустое значение");
         }
         directorDAO.addDirectorInfo(director);
@@ -39,10 +40,10 @@ public class DbDirectorService {
     }
 
     public Director updateDirectorInfo(Director director) {
-        if (director.getName() == null || director.getName().isEmpty()) {
+        if (Objects.isNull(director.getName()) || director.getName().isEmpty()) {
             throw new RequiredBodyFieldAbsenceException("Поле с именем режиссёра отсутствует или имеет пустое значение");
         }
-        if (director.getId() == null) {
+        if (Objects.isNull(director.getId())) {
             throw new RequiredBodyFieldAbsenceException("Поле с id режиссёра отсутствует или имеет пустое значение");
         }
         if (!directorDAO.isDirectorExists(director.getId())) {

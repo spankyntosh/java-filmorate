@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.implementation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,8 +14,12 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 @Slf4j
 @Component
@@ -92,19 +97,20 @@ public class FilmDAOImpl implements FilmDAO {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("films").usingGeneratedKeyColumns("id");
         int filmId = insert.executeAndReturnKey(film.toMap()).intValue();
         film.setId(filmId);
-        if (film.getMpa() != null) {
+        if (!isNull(film.getMpa())) {
             mpaFilmDAO.addMpaFilmRecord(film.getId(), film.getMpa().getId());
         }
-        if (film.getGenres() != null) {
+        if (!isNull(film.getGenres())) {
             filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres().stream().distinct().collect(Collectors.toList()));
         }
-        if (film.getDirectors() != null) {
+        if (!isNull(film.getDirectors())) {
             for (Director director : film.getDirectors()) {
                 if (!directorDAO.isDirectorExists(director.getId())) {
                     throw new EntityNotFoundException(String.format("Режиссёр с идентификатором %d не найден", director.getId()));
                 }
-                insertIntoFilmsDirectorsTable(filmId, director.getId());
             }
+            filmDirectorDAO.addRecords(new ArrayList<>(film.getDirectors()), film.getId());
+
         }
         return film;
     }
@@ -161,17 +167,21 @@ public class FilmDAOImpl implements FilmDAO {
             film.getGenres().stream().forEach(genre -> filmGenreDAO.addFilmGenreRecord(film.getId(), List.of(genre)));
         }
 
+
         filmDirectorDAO.deleteRecords(film.getId());
-        if (film.getDirectors() !=  null) {
+        if (!isNull(film.getDirectors())) {
             for (Director director : film.getDirectors()) {
-                filmDirectorDAO.addRecord(director.getId(), film.getId());
+                if (!directorDAO.isDirectorExists(director.getId())) {
+                    throw new EntityNotFoundException(String.format("Режиссёр с идентификатором %d не найден", director.getId()));
+                }
             }
+            filmDirectorDAO.addRecords(new ArrayList<>(film.getDirectors()), film.getId());
         }
 
-        if (film.getGenres() == null) {
+        if (isNull(film.getGenres())) {
             film.setGenres(new ArrayList<>());
         }
-        if (film.getDirectors() == null) {
+        if (isNull(film.getDirectors())) {
             film.setDirectors(new ArrayList<>());
         }
         return film;
@@ -203,15 +213,6 @@ public class FilmDAOImpl implements FilmDAO {
     @Override
     public void removeLike(Integer filmId, Integer userId) {
         likeDAO.deleteRecord(filmId, userId);
-    }
-
-    private void insertIntoFilmsDirectorsTable(Integer filmId, Integer directorId) {
-        HashMap<String, Integer> map = new HashMap<>();
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("films_directors");
-
-        map.put("film_id", filmId);
-        map.put("director_id", directorId);
-        insert.execute(map);
     }
 
 }
