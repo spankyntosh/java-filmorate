@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
@@ -14,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @Service
 public class DbFilmService {
 
@@ -55,20 +58,8 @@ public class DbFilmService {
         }
         return filmDAO.getFilmById(filmId);
     }
-
-    public Collection<Film> getPopularFilms(Integer count) {
-
-        String statement = "SELECT f.* "
-                + "FROM films as f "
-                + "LEFT JOIN likes AS l ON f.id = l.film_id "
-                + "GROUP BY f.id "
-                + "ORDER BY COUNT(l.user_id) DESC "
-                + "LIMIT ?";
-
-        return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), count);
-    }
-
-    public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
+    
+     public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
         if (!directorDAO.isDirectorExists(directorId)) {
             throw new EntityNotFoundException("Режиссёр с таким идентификатором не найден");
         }
@@ -76,6 +67,57 @@ public class DbFilmService {
             throw new QueryParamException(String.format("Допустимые значения для sortBy likes или year"));
         }
         return filmDAO.getDirectorAllFilms(directorId, sortBy);
+        
+    }
+
+    public Collection<Film> getMostPopularFilms(Integer count, Integer genre, Integer year) {
+
+        String statement;
+
+        if (genre != null & year != null) {
+            statement = "SELECT f.* "
+                    + "FROM films as f "
+                    + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                    + "LEFT JOIN films_genres AS g ON f.id = g.film_id "
+                    + "WHERE EXTRACT(YEAR from f.release_date) = ? "
+                    + "AND g.genre_id = ? "
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC "
+                    + "LIMIT ?";
+
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), year, genre, count);
+        }
+        if (genre != null) {
+            statement = "SELECT f.* "
+                    + "FROM films as f "
+                    + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                    + "LEFT JOIN films_genres AS g ON f.id = g.film_id "
+                    + "WHERE g.genre_id = ? "
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC "
+                    + "LIMIT ?";
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), genre, count);
+        }
+        if (year != null) {
+            statement = "SELECT f.* "
+                    + "FROM films as f "
+                    + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                    + "LEFT JOIN films_genres AS g ON f.id = g.film_id "
+                    + "WHERE EXTRACT(YEAR from f.release_date) = ? "
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC "
+                    + "LIMIT ?";
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), year, count);
+        } else {
+            statement = "SELECT f.* "
+                    + "FROM films as f "
+                    + "LEFT JOIN likes AS l ON f.id = l.film_id "
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC "
+                    + "LIMIT ?";
+
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), count);
+        }
     }
 
     public Film addFilm(Film film) {
