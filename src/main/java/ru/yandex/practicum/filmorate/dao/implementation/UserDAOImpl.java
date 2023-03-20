@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.UserMapper;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -24,7 +25,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public Collection<User> getUsers() {
         String statement = "SELECT * "
-                         + "FROM users";
+                + "FROM users";
 
         return jdbcTemplate.query(statement, new UserMapper());
     }
@@ -41,10 +42,19 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
+    public void delete(Integer id) {
+        if (!isUserExists(id)) {
+            throw new EntityNotFoundException("Попытка удалить пользователя с несуществующим id фильма");
+        }
+        String deleteQuery = "DELETE FROM users WHERE id = ?";
+        jdbcTemplate.update(deleteQuery, id);
+    }
+
+    @Override
     public User updateUserInfo(User user) {
         String statement = "UPDATE users "
-                         + "SET name = ?, login = ?, birthday = ?, email = ? "
-                         + "WHERE id = ?";
+                + "SET name = ?, login = ?, birthday = ?, email = ? "
+                + "WHERE id = ?";
 
         jdbcTemplate.update(statement
                 , user.getName()
@@ -59,8 +69,8 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public boolean isUserExists(Integer userId) {
         String statement = "SELECT * "
-                         + "FROM users "
-                         + "WHERE id = ?";
+                + "FROM users "
+                + "WHERE id = ?";
 
         List<User> userList = jdbcTemplate.query(statement, new UserMapper(), userId);
         return !userList.isEmpty();
@@ -69,8 +79,8 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User getUserById(Integer userId) {
         String statement = "SELECT * "
-                         + "FROM users "
-                         + "WHERE id = ?";
+                + "FROM users "
+                + "WHERE id = ?";
 
         return jdbcTemplate.queryForObject(statement, new UserMapper(), userId);
 
@@ -79,11 +89,11 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public Collection<User> getUserFriends(Integer userId) {
         String statement = "SELECT * "
-                         + "FROM users "
-                         + "WHERE id IN "
-                         + "(SELECT user_id_to_whom_send "
-                         + "FROM friendships "
-                         + "WHERE user_id_who_send = ?)";
+                + "FROM users "
+                + "WHERE id IN "
+                + "(SELECT user_id_to_whom_send "
+                + "FROM friendships "
+                + "WHERE user_id_who_send = ?)";
 
         return jdbcTemplate.query(statement, new UserMapper(), userId);
     }
@@ -91,10 +101,10 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public Collection<User> getCommonFriends(Integer userId, Integer otherId) {
         String statement = "SELECT * "
-                         + "FROM users AS u "
-                         + "LEFT JOIN friendships as f1 ON u.id = f1.user_id_to_whom_send "
-                         + "LEFT JOIN friendships as f2 ON u.id = f2.user_id_to_whom_send "
-                         + "WHERE f1.user_id_who_send = ? AND f2.user_id_who_send = ?";
+                + "FROM users AS u "
+                + "LEFT JOIN friendships as f1 ON u.id = f1.user_id_to_whom_send "
+                + "LEFT JOIN friendships as f2 ON u.id = f2.user_id_to_whom_send "
+                + "WHERE f1.user_id_who_send = ? AND f2.user_id_who_send = ?";
 
         return jdbcTemplate.query(statement, new UserMapper(), userId, otherId);
     }
