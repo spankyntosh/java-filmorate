@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.DbRecommendationService;
 import ru.yandex.practicum.filmorate.service.DbUserService;
 import javax.validation.Valid;
 import java.util.Collection;
@@ -15,9 +17,11 @@ import java.util.Collection;
 public class UserController {
 
     private final DbUserService userService;
+    private final DbRecommendationService recommendationService;
     @Autowired
-    public UserController(DbUserService userService) {
+    public UserController(DbUserService userService, DbRecommendationService recommendationService) {
         this.userService = userService;
+        this.recommendationService = recommendationService;
     }
 
     @GetMapping
@@ -38,6 +42,11 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public Collection<Film> getRecommendations(@PathVariable Integer id) {
+        return recommendationService.getRecommendations(id);
     }
 
     @GetMapping("/{id}/feed")
