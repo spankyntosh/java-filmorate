@@ -188,6 +188,46 @@ public class FilmDAOImpl implements FilmDAO {
     }
 
     @Override
+    public Collection<Film> search(String query) {
+        String searchQuery =
+                "SELECT f.* " +
+                "FROM films f " +
+                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
+                "LEFT JOIN directors d ON fd.director_id = d.id " +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
+                "WHERE UPPER(d.director_name) LIKE UPPER(?) OR UPPER(f.name) LIKE UPPER(?) " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(l.USER_ID) DESC";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%", "%"+query+"%");
+    }
+
+    @Override
+    public Collection<Film> searchByTitle(String query) {
+        String searchQuery =
+                "SELECT * " +
+                "FROM FILMS f " +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
+                "WHERE UPPER(NAME) LIKE UPPER(?) " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(l.user_id)";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%");
+    }
+
+    @Override
+    public Collection<Film> searchByDirector(String query) {
+        String searchQuery =
+                "SELECT f.* " +
+                "FROM films f " +
+                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
+                "LEFT JOIN directors d ON fd.director_id = d.id " +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
+                "WHERE UPPER(d.director_name) LIKE UPPER(?) " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(l.USER_ID) desc";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%");
+    }
+
+    @Override
     public boolean isFilmAlreadyHaveLikeFromUser(Integer filmId, Integer userId) {
         String statement = "SELECT user_id "
                 + "FROM likes "
