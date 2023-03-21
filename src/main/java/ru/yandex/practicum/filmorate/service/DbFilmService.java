@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.QueryParamException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,15 +25,26 @@ public class DbFilmService {
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmGenreDAO filmGenreDAO;
     private final LikeDAO likeDAO;
+    private final DirectorDAO directorDAO;
+    private final FilmDirectorDAO filmDirectorDAO;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbFilmService(FilmDAO filmDAO, UserDAO userDAO, MpaFilmDAO mpaFilmDAO, FilmGenreDAO filmGenreDAO, LikeDAO likeDAO, JdbcTemplate jdbcTemplate) {
+    public DbFilmService(FilmDAO filmDAO
+            , UserDAO userDAO
+            , MpaFilmDAO mpaFilmDAO
+            , FilmGenreDAO filmGenreDAO
+            , LikeDAO likeDAO
+            , DirectorDAO directorDAO
+            , FilmDirectorDAO filmDirectorDAO
+            , JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
         this.mpaFilmDAO = mpaFilmDAO;
         this.filmGenreDAO = filmGenreDAO;
         this.likeDAO = likeDAO;
+        this.directorDAO = directorDAO;
+        this.filmDirectorDAO = filmDirectorDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -45,6 +57,17 @@ public class DbFilmService {
             throw new EntityNotFoundException(String.format("фильм с id %s не найден", filmId));
         }
         return filmDAO.getFilmById(filmId);
+    }
+    
+     public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
+        if (!directorDAO.isDirectorExists(directorId)) {
+            throw new EntityNotFoundException("Режиссёр с таким идентификатором не найден");
+        }
+        if (sortBy == null || !(sortBy.contentEquals("year") || sortBy.contentEquals("likes"))) {
+            throw new QueryParamException("Допустимые значения для sortBy likes или year");
+        }
+        return filmDAO.getDirectorAllFilms(directorId, sortBy);
+        
     }
 
     public Collection<Film> getMostPopularFilms(Integer count, Integer genre, Integer year) {
@@ -62,7 +85,7 @@ public class DbFilmService {
                     + "ORDER BY COUNT(l.user_id) DESC "
                     + "LIMIT ?";
 
-            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), year, genre, count);
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), year, genre, count);
         }
         if (genre != null) {
             statement = "SELECT f.* "
@@ -73,7 +96,7 @@ public class DbFilmService {
                     + "GROUP BY f.id "
                     + "ORDER BY COUNT(l.user_id) DESC "
                     + "LIMIT ?";
-            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), genre, count);
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), genre, count);
         }
         if (year != null) {
             statement = "SELECT f.* "
@@ -84,7 +107,7 @@ public class DbFilmService {
                     + "GROUP BY f.id "
                     + "ORDER BY COUNT(l.user_id) DESC "
                     + "LIMIT ?";
-            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), year, count);
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), year, count);
         } else {
             statement = "SELECT f.* "
                     + "FROM films as f "
@@ -93,7 +116,7 @@ public class DbFilmService {
                     + "ORDER BY COUNT(l.user_id) DESC "
                     + "LIMIT ?";
 
-            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO), count);
+            return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), count);
         }
     }
 
