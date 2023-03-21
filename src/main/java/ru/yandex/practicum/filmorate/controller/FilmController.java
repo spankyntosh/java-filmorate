@@ -45,6 +45,12 @@ public class FilmController {
         return filmService.getMostPopularFilms(count, genreId, year);
     }
 
+    @GetMapping("/search")
+    public Collection<Film> search(@RequestParam String query,
+                                   @RequestParam String by) {
+        return filmService.search(query, by);
+    }
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Пришёл запрос на добавление нового фильма");

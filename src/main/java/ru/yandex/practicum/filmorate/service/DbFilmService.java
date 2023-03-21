@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
@@ -118,6 +117,20 @@ public class DbFilmService {
 
             return jdbcTemplate.query(statement, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), count);
         }
+    }
+
+    public Collection<Film> search(String query, String by) {
+        if (by.contains("director") && by.contains("title")) {
+            return filmDAO.search(query);
+        }
+        if (by.contains("director")) {
+            return filmDAO.searchByDirector(query);
+        }
+        if (by.contains("title")) {
+            return filmDAO.searchByTitle(query);
+        }
+
+        throw new QueryParamException("Допустимые значения для by - title и/или director");
     }
 
     public Film addFilm(Film film) {
