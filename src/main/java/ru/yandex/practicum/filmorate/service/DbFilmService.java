@@ -10,7 +10,10 @@ import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.QueryParamException;
 import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Operation;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +29,7 @@ public class DbFilmService {
     private final LikeDAO likeDAO;
     private final DirectorDAO directorDAO;
     private final FilmDirectorDAO filmDirectorDAO;
+    private final EventDAO eventDAO;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -36,6 +40,7 @@ public class DbFilmService {
             , LikeDAO likeDAO
             , DirectorDAO directorDAO
             , FilmDirectorDAO filmDirectorDAO
+            , EventDAO eventDAO
             , JdbcTemplate jdbcTemplate) {
         this.filmDAO = filmDAO;
         this.userDAO = userDAO;
@@ -44,6 +49,7 @@ public class DbFilmService {
         this.likeDAO = likeDAO;
         this.directorDAO = directorDAO;
         this.filmDirectorDAO = filmDirectorDAO;
+        this.eventDAO = eventDAO;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -168,6 +174,15 @@ public class DbFilmService {
             throw new ReLikeException(String.format("у фильма с id %d уже есть лайк от пользователя с id %d", filmId, userId));
         }
         filmDAO.addLike(filmId, userId);
+        Event event = new Event()
+                .toBuilder()
+                .userId(userId)
+                .entityId(filmId)
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .build();
+        eventDAO.addEvent(event);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
@@ -181,6 +196,15 @@ public class DbFilmService {
             throw new ReLikeException(String.format("у фильма с id %d уже отсутствует лайк от пользователя с id %d", filmId, userId));
         }
         filmDAO.removeLike(filmId, userId);
+        Event event = new Event()
+                .toBuilder()
+                .userId(userId)
+                .entityId(filmId)
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .build();
+        eventDAO.addEvent(event);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {

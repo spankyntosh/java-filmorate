@@ -3,7 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.EventDAO;
 import ru.yandex.practicum.filmorate.dao.ReviewDAO;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
@@ -14,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewDAO<Review> reviewStorage;
+    private final EventDAO eventDAO;
 
     public List<Review> getAll() {
         return reviewStorage.getAll();
@@ -24,10 +29,29 @@ public class ReviewService {
     }
 
     public Review create(Review review) {
+        Event event = new Event()
+                .toBuilder()
+                .userId(review.getUserId())
+                .entityId(review.getReviewId().intValue())
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .build();
+        eventDAO.addEvent(event);
         return reviewStorage.create(review);
+
     }
 
     public Review update(Review review) {
+        Event event = new Event()
+                .toBuilder()
+                .userId(review.getUserId())
+                .entityId(review.getReviewId().intValue())
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .build();
+        eventDAO.addEvent(event);
         return reviewStorage.update(review);
     }
 
@@ -52,6 +76,16 @@ public class ReviewService {
     }
 
     public void delete(Long reviewId) {
+        Review review = getByReviewId(reviewId);
+        Event event = new Event()
+                .toBuilder()
+                .userId(review.getUserId())
+                .entityId(review.getReviewId().intValue())
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .build();
+        eventDAO.addEvent(event);
         reviewStorage.delete(reviewId);
     }
 }
