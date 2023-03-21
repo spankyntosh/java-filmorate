@@ -13,6 +13,9 @@ public interface FilmDAO {
     void delete(Integer id);
     boolean isFilmExists(Integer filmId);
     Film updateFilmInfo(Film film);
+    Collection<Film> search(String query);
+    Collection<Film> searchByTitle(String query);
+    Collection<Film> searchByDirector(String query);
     boolean isFilmAlreadyHaveLikeFromUser(Integer filmId, Integer userId);
     void addLike(Integer filmId, Integer userId);
     void removeLike(Integer filmId, Integer userId);
