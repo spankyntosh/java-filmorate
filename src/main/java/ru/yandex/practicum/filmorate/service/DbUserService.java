@@ -2,11 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.EventDAO;
 import ru.yandex.practicum.filmorate.dao.FriendshipDAO;
 import ru.yandex.practicum.filmorate.dao.UserDAO;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ReFriendException;
 import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -17,11 +21,13 @@ public class DbUserService {
 
     private final UserDAO userDAO;
     private final FriendshipDAO friendshipDAO;
+    private final EventDAO eventDAO;
 
     @Autowired
-    public DbUserService(UserDAO userDAO, FriendshipDAO friendshipDAO) {
+    public DbUserService(UserDAO userDAO, FriendshipDAO friendshipDAO, EventDAO eventDAO) {
         this.userDAO = userDAO;
         this.friendshipDAO = friendshipDAO;
+        this.eventDAO = eventDAO;
     }
 
     public Collection<User> getUsers() {
@@ -50,6 +56,13 @@ public class DbUserService {
             throw new EntityNotFoundException("Попытка получить список общих друзей с пользователем с несуществующим id");
         }
         return userDAO.getCommonFriends(userId, otherUserId);
+    }
+
+    public Collection<Event> getUserFeed(Integer userId) {
+        if (!userDAO.isUserExists(userId)) {
+            throw new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId));
+        }
+        return eventDAO.getEventsByUserId(userId);
     }
 
     public User addUser(User user) {
@@ -84,6 +97,15 @@ public class DbUserService {
             throw new ReFriendException("Попытка добавить в друзья пользователя уже находящегося в списке друзей");
         }
         friendshipDAO.addFriend(userId, friendId);
+        Event event = new Event()
+                .toBuilder()
+                .userId(userId)
+                .entityId(friendId)
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .build();
+        eventDAO.addEvent(event);
     }
 
     public void excludeFromFriends(Integer userId, Integer friendId) {
@@ -97,6 +119,15 @@ public class DbUserService {
             throw new ReFriendException("Попытка исключить из друзей пользователя не находящегося в списке друзей");
         }
         friendshipDAO.excludeFromFriends(userId, friendId);
+        Event event = new Event()
+                .toBuilder()
+                .userId(userId)
+                .entityId(friendId)
+                .timestamp(System.currentTimeMillis())
+                .eventType(EventType.FRIEND)
+                .operation(Operation.REMOVE)
+                .build();
+        eventDAO.addEvent(event);
     }
 
 }
