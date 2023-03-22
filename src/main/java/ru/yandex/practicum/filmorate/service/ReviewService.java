@@ -29,24 +29,26 @@ public class ReviewService {
     }
 
     public Review create(Review review) {
+        Review newReview = reviewStorage.create(review);
         Event event = new Event()
                 .toBuilder()
-                .userId(review.getUserId())
-                .entityId(review.getReviewId().intValue())
+                .userId(newReview.getUserId())
+                .entityId(newReview.getReviewId().intValue())
                 .timestamp(System.currentTimeMillis())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.ADD)
                 .build();
         eventDAO.addEvent(event);
-        return reviewStorage.create(review);
+        return newReview;
 
     }
 
     public Review update(Review review) {
+        Review upReview = reviewStorage.update(review);
         Event event = new Event()
                 .toBuilder()
-                .userId(review.getUserId())
-                .entityId(review.getReviewId().intValue())
+                .userId(upReview.getUserId())
+                .entityId(upReview.getReviewId().intValue())
                 .timestamp(System.currentTimeMillis())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.UPDATE)
