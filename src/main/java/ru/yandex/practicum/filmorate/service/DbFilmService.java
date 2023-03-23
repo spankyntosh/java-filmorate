@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
@@ -18,8 +17,8 @@ import ru.yandex.practicum.filmorate.model.Operation;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class DbFilmService {
 
     private final FilmDAO filmDAO;
@@ -32,27 +31,6 @@ public class DbFilmService {
     private final EventDAO eventDAO;
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public DbFilmService(FilmDAO filmDAO
-            , UserDAO userDAO
-            , MpaFilmDAO mpaFilmDAO
-            , FilmGenreDAO filmGenreDAO
-            , LikeDAO likeDAO
-            , DirectorDAO directorDAO
-            , FilmDirectorDAO filmDirectorDAO
-            , EventDAO eventDAO
-            , JdbcTemplate jdbcTemplate) {
-        this.filmDAO = filmDAO;
-        this.userDAO = userDAO;
-        this.mpaFilmDAO = mpaFilmDAO;
-        this.filmGenreDAO = filmGenreDAO;
-        this.likeDAO = likeDAO;
-        this.directorDAO = directorDAO;
-        this.filmDirectorDAO = filmDirectorDAO;
-        this.eventDAO = eventDAO;
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     public Collection<Film> getFilms() {
         return filmDAO.getFilms();
     }
@@ -63,8 +41,8 @@ public class DbFilmService {
         }
         return filmDAO.getFilmById(filmId);
     }
-    
-     public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
+
+    public Collection<Film> getDirectorAllFilms(Integer directorId, String sortBy) {
         if (!directorDAO.isDirectorExists(directorId)) {
             throw new EntityNotFoundException("Режиссёр с таким идентификатором не найден");
         }
@@ -72,7 +50,7 @@ public class DbFilmService {
             throw new QueryParamException("Допустимые значения для sortBy likes или year");
         }
         return filmDAO.getDirectorAllFilms(directorId, sortBy);
-        
+
     }
 
     public Collection<Film> getMostPopularFilms(Integer count, Integer genre, Integer year) {

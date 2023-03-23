@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.dao.DirectorDAO;
 import ru.yandex.practicum.filmorate.dao.FilmDirectorDAO;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
 import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;

@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.GenreDAO;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
@@ -10,14 +10,10 @@ import java.util.Collection;
 
 
 @Component
+@RequiredArgsConstructor
 public class DbGenreService {
 
     private final GenreDAO genreDAO;
-
-    @Autowired
-    public DbGenreService(GenreDAO genreDAO) {
-        this.genreDAO = genreDAO;
-    }
 
     public Collection<Genre> findAll() {
         return genreDAO.findAll();

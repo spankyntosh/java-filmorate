@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.MpaFilm;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

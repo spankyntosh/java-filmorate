@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.EventDAO;
 import ru.yandex.practicum.filmorate.dao.ReviewDAO;
@@ -13,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {

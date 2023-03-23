@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.EventDAO;
 import ru.yandex.practicum.filmorate.dao.FriendshipDAO;
@@ -14,21 +14,14 @@ import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class DbUserService {
 
     private final UserDAO userDAO;
     private final FriendshipDAO friendshipDAO;
     private final EventDAO eventDAO;
-
-    @Autowired
-    public DbUserService(UserDAO userDAO, FriendshipDAO friendshipDAO, EventDAO eventDAO) {
-        this.userDAO = userDAO;
-        this.friendshipDAO = friendshipDAO;
-        this.eventDAO = eventDAO;
-    }
 
     public Collection<User> getUsers() {
         return userDAO.getUsers();
