@@ -27,4 +27,12 @@ public class Director {
         map.put("director_name", this.name);
         return map;
     }
+
+    @Override
+    public String toString() {
+        return "Director{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

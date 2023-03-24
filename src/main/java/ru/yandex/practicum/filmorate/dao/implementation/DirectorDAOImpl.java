@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -66,11 +65,26 @@ public class DirectorDAOImpl implements DirectorDAO {
 
     @Override
     public boolean isDirectorExists(Integer directorId) {
-        String statement = "SELECT * "
-                + "FROM directors "
-                + "WHERE id = ?";
-        List<Director> list = jdbcTemplate.query(statement, new DirectorMapper(), directorId);
 
-        return !list.isEmpty();
+        String statement = "SELECT EXISTS (SELECT * "
+                + "FROM directors "
+                + "WHERE id = ?)";
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(statement, Boolean.TYPE, directorId));
+    }
+
+    @Override
+    public boolean isAllDirectorsExists(List<Integer> directorIds, Integer expectedIdsCount) {
+        String baseStatement = "SELECT COUNT (director_name) FROM directors WHERE id IN (";
+        StringBuilder queryBuilder = new StringBuilder(baseStatement);
+        for (int i = 0; i < directorIds.size(); i++) {
+            if (i == directorIds.size() - 1) {
+                queryBuilder.append(directorIds.get(i) + " )");
+            } else {
+                queryBuilder.append(directorIds.get(i) + ", ");
+            }
+        }
+        Integer dbCount = jdbcTemplate.queryForObject(queryBuilder.toString(), Integer.TYPE);
+        return dbCount == expectedIdsCount;
     }
 }

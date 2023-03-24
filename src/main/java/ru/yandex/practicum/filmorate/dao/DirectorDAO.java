@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface DirectorDAO {
 
@@ -17,4 +18,5 @@ public interface DirectorDAO {
     void deleteDirectorInfo(Integer directorId);
 
     boolean isDirectorExists(Integer directorId);
+    boolean isAllDirectorsExists(List<Integer> directorIds, Integer expectedIdsCount);
 }

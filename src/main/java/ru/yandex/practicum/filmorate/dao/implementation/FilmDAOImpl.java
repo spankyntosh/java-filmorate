@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor
@@ -85,13 +86,12 @@ public class FilmDAOImpl implements FilmDAO {
             mpaFilmDAO.addMpaFilmRecord(film.getId(), film.getMpa().getId());
         }
         if (!isNull(film.getGenres())) {
-            filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres().stream().distinct().collect(Collectors.toList()));
+            filmGenreDAO.addFilmGenreRecord(film.getId(), film.getGenres().stream().distinct().collect(toList()));
         }
         if (!isNull(film.getDirectors())) {
-            for (Director director : film.getDirectors()) {
-                if (!directorDAO.isDirectorExists(director.getId())) {
-                    throw new EntityNotFoundException(String.format("Режиссёр с идентификатором %d не найден", director.getId()));
-                }
+            List<Integer> directorIDs = film.getDirectors().stream().map(Director::getId).collect(toList());
+            if (!directorDAO.isAllDirectorsExists(directorIDs, film.getDirectors().size())) {
+                throw new EntityNotFoundException("Не найдена информация об одном или нескольких режиссёрах ");
             }
             filmDirectorDAO.addRecords(new ArrayList<>(film.getDirectors()), film.getId());
 
@@ -110,12 +110,11 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public boolean isFilmExists(Integer filmId) {
-        String statement = "SELECT * "
+        String statement = "SELECT EXISTS (SELECT * "
                 + "FROM films "
-                + "WHERE id = ?";
+                + "WHERE id = ?)";
 
-        List<Film> filmList = jdbcTemplate.query(statement, new FilmMapper(), filmId);
-        return !filmList.isEmpty();
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(statement, Boolean.TYPE, filmId));
     }
 
     @Override
@@ -147,17 +146,16 @@ public class FilmDAOImpl implements FilmDAO {
                         }
                     })
                     .distinct()
-                    .collect(Collectors.toList()));
-            film.getGenres().stream().forEach(genre -> filmGenreDAO.addFilmGenreRecord(film.getId(), List.of(genre)));
+                    .collect(toList()));
+            filmGenreDAO.addFilmGenreRecords(film.getGenres(), film.getId());
         }
 
 
         filmDirectorDAO.deleteRecords(film.getId());
         if (!isNull(film.getDirectors())) {
-            for (Director director : film.getDirectors()) {
-                if (!directorDAO.isDirectorExists(director.getId())) {
-                    throw new EntityNotFoundException(String.format("Режиссёр с идентификатором %d не найден", director.getId()));
-                }
+            List<Integer> directorIDs = film.getDirectors().stream().map(Director::getId).collect(toList());
+            if (!directorDAO.isAllDirectorsExists(directorIDs, film.getDirectors().size())) {
+                throw new EntityNotFoundException("Не найдена информация об одном или нескольких режиссёрах");
             }
             filmDirectorDAO.addRecords(new ArrayList<>(film.getDirectors()), film.getId());
         }
@@ -213,19 +211,12 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public boolean isFilmAlreadyHaveLikeFromUser(Integer filmId, Integer userId) {
-        String statement = "SELECT user_id "
+        String statement = "SELECT EXISTS (SELECT user_id "
                 + "FROM likes "
-                + "WHERE film_id = ?";
+                + "WHERE film_id = ? AND user_id = ?)";
 
-        ResultSetExtractor<List<Integer>> extractor = rs -> {
-            List<Integer> list = new ArrayList<>();
-            while (rs.next()) {
-                list.add(rs.getInt("user_id"));
-            }
-            return list;
-        };
-        List<Integer> idList = jdbcTemplate.query(statement, extractor, filmId);
-        return idList.contains(userId);
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(statement, Boolean.TYPE, filmId, userId));
 
     }
 

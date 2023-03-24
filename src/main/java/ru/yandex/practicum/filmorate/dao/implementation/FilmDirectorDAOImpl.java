@@ -32,9 +32,9 @@ public class FilmDirectorDAOImpl implements FilmDirectorDAO {
 
     @Override
     public void addRecord(Integer directorId, Integer filmId) {
-        Map<String, Integer> map = Map.of("director_id", directorId, "film_id", filmId);
+        Map<String, Integer> directorFilmMap = Map.of("director_id", directorId, "film_id", filmId);
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("films_directors");
-        insert.execute(map);
+        insert.execute(directorFilmMap);
     }
 
     @Override
@@ -55,6 +55,7 @@ public class FilmDirectorDAOImpl implements FilmDirectorDAO {
         };
 
         jdbcTemplate.batchUpdate(statement, setter);
+
     }
 
     @Override
