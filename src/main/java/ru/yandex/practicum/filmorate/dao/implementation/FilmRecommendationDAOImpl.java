@@ -1,30 +1,25 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.*;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.FilmDirectorDAO;
+import ru.yandex.practicum.filmorate.dao.FilmGenreDAO;
+import ru.yandex.practicum.filmorate.dao.FilmRecommendationDAO;
+import ru.yandex.practicum.filmorate.dao.MpaFilmDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 
-@Component
+@Repository
+@RequiredArgsConstructor
 public class FilmRecommendationDAOImpl implements FilmRecommendationDAO {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmGenreDAO filmGenreDAO;
     private final MpaFilmDAO mpaFilmDAO;
     private final FilmDirectorDAO filmDirectorDAO;
-
-    @Autowired
-    public FilmRecommendationDAOImpl(JdbcTemplate jdbcTemplate, FilmGenreDAO filmGenreDAO,
-                                     MpaFilmDAO mpaFilmDAO, FilmDirectorDAO filmDirectorDAO) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmGenreDAO = filmGenreDAO;
-        this.mpaFilmDAO = mpaFilmDAO;
-        this.filmDirectorDAO = filmDirectorDAO;
-    }
 
     @Override
     public Collection<Film> getRecommendation(Integer userId) {

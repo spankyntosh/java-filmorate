@@ -3,17 +3,17 @@ package ru.yandex.practicum.filmorate.dao.implementation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.constants.ReviewConstants;
 import ru.yandex.practicum.filmorate.dao.ReviewDAO;
-import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.dao.mappers.ReviewRowMapper;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Repository
 @Primary
 @RequiredArgsConstructor
 public class ReviewDaoImpl implements ReviewDAO<Review> {
@@ -32,7 +32,7 @@ public class ReviewDaoImpl implements ReviewDAO<Review> {
     public List<Review> getByParams(Map<String, Integer> params) {
         StringBuilder queryString = new StringBuilder(ReviewConstants.GET_REVIEWS_BY_FILM_ID);
         int limit = 10;
-        if(!params.isEmpty()) {
+        if (!params.isEmpty()) {
             if (params.containsKey("filmId")) {
                 queryString.append(" WHERE ")
                         .append("film_id = ")

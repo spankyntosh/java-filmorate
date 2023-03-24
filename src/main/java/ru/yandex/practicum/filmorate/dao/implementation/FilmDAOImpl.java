@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
@@ -14,15 +12,16 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
-@Slf4j
-@Component
+@Repository
+@RequiredArgsConstructor
 public class FilmDAOImpl implements FilmDAO {
 
     private final FilmGenreDAO filmGenreDAO;
@@ -31,21 +30,6 @@ public class FilmDAOImpl implements FilmDAO {
     private final DirectorDAO directorDAO;
     private final JdbcTemplate jdbcTemplate;
     private final FilmDirectorDAO filmDirectorDAO;
-
-    @Autowired
-    public FilmDAOImpl(JdbcTemplate jdbcTemplate
-            , FilmGenreDAO filmGenreDAO
-            , MpaFilmDAO mpaFilmDAO
-            , LikeDAO likeDAO
-            , DirectorDAO directorDAO
-            , FilmDirectorDAO filmDirectorDAO) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmGenreDAO = filmGenreDAO;
-        this.mpaFilmDAO = mpaFilmDAO;
-        this.likeDAO = likeDAO;
-        this.directorDAO = directorDAO;
-        this.filmDirectorDAO  = filmDirectorDAO;
-    }
 
     @Override
     public Collection<Film> getFilms() {
@@ -191,40 +175,40 @@ public class FilmDAOImpl implements FilmDAO {
     public Collection<Film> search(String query) {
         String searchQuery =
                 "SELECT f.* " +
-                "FROM films f " +
-                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
-                "LEFT JOIN directors d ON fd.director_id = d.id " +
-                "LEFT JOIN likes l ON f.id = l.film_id " +
-                "WHERE UPPER(d.director_name) LIKE UPPER(?) OR UPPER(f.name) LIKE UPPER(?) " +
-                "GROUP BY f.id " +
-                "ORDER BY COUNT(l.USER_ID) DESC";
-        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%", "%"+query+"%");
+                        "FROM films f " +
+                        "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
+                        "LEFT JOIN directors d ON fd.director_id = d.id " +
+                        "LEFT JOIN likes l ON f.id = l.film_id " +
+                        "WHERE UPPER(d.director_name) LIKE UPPER(?) OR UPPER(f.name) LIKE UPPER(?) " +
+                        "GROUP BY f.id " +
+                        "ORDER BY COUNT(l.USER_ID) DESC";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%" + query + "%", "%" + query + "%");
     }
 
     @Override
     public Collection<Film> searchByTitle(String query) {
         String searchQuery =
                 "SELECT * " +
-                "FROM FILMS f " +
-                "LEFT JOIN likes l ON f.id = l.film_id " +
-                "WHERE UPPER(NAME) LIKE UPPER(?) " +
-                "GROUP BY f.id " +
-                "ORDER BY COUNT(l.user_id)";
-        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%");
+                        "FROM FILMS f " +
+                        "LEFT JOIN likes l ON f.id = l.film_id " +
+                        "WHERE UPPER(NAME) LIKE UPPER(?) " +
+                        "GROUP BY f.id " +
+                        "ORDER BY COUNT(l.user_id)";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%" + query + "%");
     }
 
     @Override
     public Collection<Film> searchByDirector(String query) {
         String searchQuery =
                 "SELECT f.* " +
-                "FROM films f " +
-                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
-                "LEFT JOIN directors d ON fd.director_id = d.id " +
-                "LEFT JOIN likes l ON f.id = l.film_id " +
-                "WHERE UPPER(d.director_name) LIKE UPPER(?) " +
-                "GROUP BY f.id " +
-                "ORDER BY COUNT(l.USER_ID) desc";
-        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%"+query+"%");
+                        "FROM films f " +
+                        "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
+                        "LEFT JOIN directors d ON fd.director_id = d.id " +
+                        "LEFT JOIN likes l ON f.id = l.film_id " +
+                        "WHERE UPPER(d.director_name) LIKE UPPER(?) " +
+                        "GROUP BY f.id " +
+                        "ORDER BY COUNT(l.USER_ID) desc";
+        return jdbcTemplate.query(searchQuery, new FilmMapper(mpaFilmDAO, filmGenreDAO, filmDirectorDAO), "%" + query + "%");
     }
 
     @Override

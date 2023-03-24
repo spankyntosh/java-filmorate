@@ -1,24 +1,20 @@
 package ru.yandex.practicum.filmorate.dao.implementation;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.EventDAO;
 import ru.yandex.practicum.filmorate.dao.mappers.EventMapper;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import java.util.Collection;
 
-@Component
+@Repository
+@RequiredArgsConstructor
 public class EventDAOImpl implements EventDAO {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public EventDAOImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void addEvent(Event event) {

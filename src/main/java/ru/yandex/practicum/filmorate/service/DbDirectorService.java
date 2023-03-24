@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.DirectorDAO;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
@@ -11,14 +11,10 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class DbDirectorService {
 
     private final DirectorDAO directorDAO;
-
-    @Autowired
-    public DbDirectorService(DirectorDAO directorDAO) {
-        this.directorDAO = directorDAO;
-    }
 
     public Collection<Director> getDirectors() {
         return directorDAO.getDirectors();
