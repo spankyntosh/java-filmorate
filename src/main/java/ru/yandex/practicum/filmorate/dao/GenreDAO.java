@@ -8,7 +8,9 @@ import java.util.Collection;
 public interface GenreDAO {
 
     Collection<Genre> findAll();
+
     Genre findById(Integer genreId);
+
     boolean isGenreExists(Integer genreId);
 
 }

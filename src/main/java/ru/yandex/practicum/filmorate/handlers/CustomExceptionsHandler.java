@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.yandex.practicum.filmorate.exceptions.ErrorResponse;
-import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserOrFilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.ReLikeException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -61,5 +58,19 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
     public ErrorResponse handleReLikeException(ReLikeException exception) {
         log.warn(exception.getMessage());
         return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(RequiredBodyFieldAbsenceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleRequiredFieldException(RequiredBodyFieldAbsenceException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(QueryParamException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleQueryParamException(QueryParamException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 }

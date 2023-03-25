@@ -8,7 +8,9 @@ public interface MpaFilmDAO {
     void addMpaFilmRecord(Integer filmId, Integer mpaId);
 
     MpaFilm getMpaFilmRecord(Integer filmId);
+
     MPA getMpaByFilmId(Integer filmId);
+
     boolean isMpaFilmRecordExist(Integer filmId);
 
     void deleteMpaFilmRecord(Integer filmId);
